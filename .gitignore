@@ -1,0 +1,15 @@
+# dependencies
+*/**/node_modules/
+/vendor/
+
+# production
+*/**/build/
+*/**/dist/
+
+#example app
+#/app.php
+#/.htaccess
+
+# misc
+/.idea/
+*/**/log.txt

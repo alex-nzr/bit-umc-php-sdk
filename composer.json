@@ -1,0 +1,26 @@
+{
+    "name": "alex-nzr/bit-umc-sdk",
+    "description": "PHP library for the typical BIT-UMC SOAP API",
+    "keywords": [
+        "Bit-Umc",
+        "PHP",
+        "SOAP",
+        "API"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/alex-nzr/bit-umc-php-sdk/",
+    "autoload": {
+        "psr-4": {
+            "ANZ\\BitUmc\\Sdk\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Alexey Nazarov",
+            "email": "jc1988x@gmail.com",
+            "homepage": "https://alex-nz.ru"
+        }
+    ],
+    "require": {}
+}
