@@ -12,7 +12,7 @@
     "homepage": "https://github.com/alex-nzr/bit-umc-php-sdk/",
     "autoload": {
         "psr-4": {
-            "ANZ\\BitUmc\\Sdk\\": "src/"
+            "ANZ\\BitUmc\\SDK\\": "src/"
         }
     },
     "authors": [
@@ -22,5 +22,8 @@
             "homepage": "https://alex-nz.ru"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.0",
+        "psr/container": "^2.0"
+    }
 }

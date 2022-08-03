@@ -1,6 +1,7 @@
 # dependencies
 */**/node_modules/
 /vendor/
+/composer.lock
 
 # production
 */**/build/
