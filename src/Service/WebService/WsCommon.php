@@ -5,27 +5,27 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - BaseService.php
+ * bit-umc-php-sdk - WsCommon.php
  * 04.08.2022 01:16
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\OneC;
+namespace ANZ\BitUmc\SDK\Service\WebService;
 
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Contract\ServiceInterface;
 use ANZ\BitUmc\SDK\Core\Contract\Result;
 
 /**
- * Class BaseService
- * @package ANZ\BitUmc\SDK\Service\OneC
+ * Class WsCommon
+ * @package ANZ\BitUmc\SDK\Service\WebService
  */
-abstract class BaseService implements ServiceInterface
+abstract class WsCommon implements ServiceInterface
 {
     private ApiClient $client;
 
     /**
-     * BaseService constructor.
+     * WsCommon constructor.
      */
     public function __construct(ApiClient $client)
     {

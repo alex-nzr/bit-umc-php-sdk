@@ -13,8 +13,19 @@
 
 namespace ANZ\BitUmc\SDK\Tools;
 
-
+/**
+ * Class Debug
+ * @package ANZ\BitUmc\SDK\Tools
+ */
 class Debug
 {
-
+    public static function print(...$vars)
+    {
+        foreach ($vars as $var)
+        {
+            echo "<pre>";
+            print_r($var);
+            echo "</pre>";
+        }
+    }
 }

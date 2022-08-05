@@ -10,7 +10,7 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\Api;
+namespace ANZ\BitUmc\SDK\Core\Soap;
 
 /**
  * Class SoapMethod

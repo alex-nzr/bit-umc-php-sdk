@@ -2,6 +2,8 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php');
 
 use ANZ\BitUmc\SDK\Service\Api\UmcClient;
+use ANZ\BitUmc\SDK\Service\Factory\WsFactory;
+use ANZ\BitUmc\SDK\Tools\Debug;
 
 try {
     $client = UmcClient::create()
@@ -12,9 +14,10 @@ try {
         ->setBaseName('umc_corp')
         ->init();
 
-    echo "<pre>";
-    print_r(json_decode($client->getClinics()->getContent(), true));
-    echo "</pre>";
+    $factory = new WsFactory($client);
+    $reader  = $factory->getReader();
+
+    Debug::print($reader->getClinics()->getData());
 }
 catch (Exception $e)
 {

@@ -15,19 +15,17 @@
 
 namespace ANZ\BitUmc\SDK\Service\Api;
 
-use ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface;
-use ANZ\BitUmc\SDK\Tools\Utils;
-use ANZ\BitUmc\SDK\Tools\XmlParser;
+use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
+use ANZ\BitUmc\SDK\Core\Contract\Result;
+use ANZ\BitUmc\SDK\Core\Soap\SoapClient;
+use ANZ\BitUmc\SDK\Core\Soap\SoapMethod;
 use Exception;
-use SimpleXMLElement;
-use SoapClient;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class UmcClient
  * @package ANZ\BitUmc\SDK\Service\Api
  */
-class UmcClient implements ApiClientInterface
+class UmcClient implements ApiClient
 {
     private string $login;
     private string $password;
@@ -36,16 +34,16 @@ class UmcClient implements ApiClientInterface
     private string $baseName;
     private SoapClient $soapClient;
 
-    public static function create(): ApiClientInterface
+    public static function create(): ApiClient
     {
         return new static();
     }
 
     /**
      * @param string $login
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface
+     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
      */
-    public function setLogin(string $login): ApiClientInterface
+    public function setLogin(string $login): ApiClient
     {
         $this->login = $login;
         return $this;
@@ -53,9 +51,9 @@ class UmcClient implements ApiClientInterface
 
     /**
      * @param string $password
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface
+     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
      */
-    public function setPassword(string $password): ApiClientInterface
+    public function setPassword(string $password): ApiClient
     {
         $this->password = $password;
         return $this;
@@ -63,9 +61,9 @@ class UmcClient implements ApiClientInterface
 
     /**
      * @param bool $enabled
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface
+     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
      */
-    public function setHttps(bool $enabled): ApiClientInterface
+    public function setHttps(bool $enabled): ApiClient
     {
         $this->https = $enabled;
         return $this;
@@ -73,9 +71,9 @@ class UmcClient implements ApiClientInterface
 
     /**
      * @param string $address
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface
+     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
      */
-    public function setAddress(string $address): ApiClientInterface
+    public function setAddress(string $address): ApiClient
     {
         $this->address = $address;
         return $this;
@@ -83,23 +81,20 @@ class UmcClient implements ApiClientInterface
 
     /**
      * @param string $baseName
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface
+     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
      */
-    public function setBaseName(string $baseName): ApiClientInterface
+    public function setBaseName(string $baseName): ApiClient
     {
         $this->baseName = $baseName;
         return $this;
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClientInterface
+     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
      * @throws \Exception
      */
-    public function init(): ApiClientInterface
+    public function init(): ApiClient
     {
-        if (!class_exists('\SoapClient')) {
-            throw new Exception("SOAP extension not found");
-        }
         $this->soapClient = new SoapClient(
             $this->getFullBaseUrl(),
             $this->getSoapOptions()
@@ -138,82 +133,20 @@ class UmcClient implements ApiClientInterface
                 ]
             ),
             'soap_version' => SOAP_1_2,
+            'exceptions' => true,
             'trace' => 1,
             'connection_timeout' => 5000,
             'keep_alive' => false,
         ];
     }
 
-    /***/
-    public function call(string $soapMethod, array $params = []): Response
-    {
-        $result = new Response;
-        try {
-            $soapParams = ['parameters' => $params];
-
-            $response = $this->soapClient->__soapCall($soapMethod, $soapParams);
-
-            try {
-                $xml = new SimpleXMLElement($response->return);
-            }
-            catch(Exception $e){
-                throw new Exception($e->getMessage() . " | " . $response->return);
-            }
-
-            $jsonData = $this->handleXML($soapMethod, $xml);
-            $result->setContent($jsonData);
-        }
-        catch (Exception $e){
-            $result->setContent(Utils::getErrorResponse($e->getMessage()));
-        }
-        return $result;
-    }
-
     /**
-     * @param string $soapMethod
-     * @param \SimpleXMLElement $xml
-     * @return string
-     * @throws \Exception
+     * @param string $method
+     * @param array $params
+     * @return \ANZ\BitUmc\SDK\Core\Contract\Result
      */
-    private function handleXML(string $soapMethod, SimpleXMLElement $xml): string
+    public function send(string $method, array $params = []): Result
     {
-        $parser = XmlParser::getInstance();
-        switch ($soapMethod)
-        {
-            case SoapMethod::CLINIC_ACTION_1C:
-                $result = $parser->prepareClinicData($xml);
-                break;
-            case SoapMethod::EMPLOYEES_ACTION_1C:
-                $result = $parser->prepareEmployeesData($xml);
-                break;
-            case SoapMethod::NOMENCLATURE_ACTION_1C:
-                $result = $parser->prepareNomenclatureData($xml);
-                break;
-            case SoapMethod::SCHEDULE_ACTION_1C:
-                $result = $parser->prepareScheduleData($xml);
-                break;
-            case SoapMethod::CREATE_RESERVE_ACTION_1C:
-                $result = $parser->prepareReserveResultData($xml);
-                break;
-            case SoapMethod::CREATE_ORDER_ACTION_1C:
-            case SoapMethod::CREATE_WAIT_LIST_ACTION_1C:
-            case SoapMethod::DELETE_ORDER_ACTION_1C:
-                $result = $parser->prepareCommonResultData($xml);
-                break;
-            case SoapMethod::GET_ORDER_STATUS_ACTION_1C:
-                $result = $parser->prepareStatusResultData($xml);
-                break;
-            default:
-                throw new Exception('Can not find way to process xml for method - '.$soapMethod.'.');
-        }
-        return json_encode($result);
-    }
-
-    /**
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function getClinics(): Response
-    {
-        return $this->call(SoapMethod::CLINIC_ACTION_1C);
+        return $this->soapClient->send($method, $params);
     }
 }

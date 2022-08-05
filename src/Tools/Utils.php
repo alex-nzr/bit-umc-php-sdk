@@ -126,13 +126,4 @@ class Utils
 
         return "0001-01-01T".$hours.":".$minutes.":00";
     }
-
-    /**
-     * @param string $errorMessage
-     * @return string
-     */
-    public static function getErrorResponse(string $errorMessage): string
-    {
-        return json_encode(['error' => $errorMessage]);
-    }
 }
