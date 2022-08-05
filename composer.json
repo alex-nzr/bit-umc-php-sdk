@@ -24,6 +24,9 @@
     ],
     "require": {
         "php": ">=8.0",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "ext-soap": "*",
+        "ext-simplexml": "*",
+        "symfony/http-foundation": "^6.1"
     }
 }

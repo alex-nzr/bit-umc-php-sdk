@@ -47,6 +47,8 @@ class Container
      */
      public function getApiClient(string $wsUrl, string $login, string $password): ApiClientInterface
      {
+         //TODO переделать - клиент будет создаваться конструктором и под капотом юзать контейнер сервисов
+         //TODO сервис-локатор переделать на фабрику
          if (!ServiceLocator::getInstance()->has('umc.sdk.client'))
          {
              ServiceLocator::getInstance()->add('umc.sdk.client', UmcClient::class, [
