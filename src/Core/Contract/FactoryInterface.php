@@ -5,19 +5,18 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - Reader.php
- * 04.08.2022 01:43
+ * bit-umc-php-sdk - ServiceFactory.php
+ * 06.08.2022 00:56
  * ==================================================
  */
 
-
-namespace ANZ\BitUmc\SDK\Service\OneC;
+namespace ANZ\BitUmc\SDK\Core\Contract;
 
 /**
- * Class Reader
- * @package ANZ\BitUmc\SDK\Service\OneC
+ * Interface ServiceFactory
+ * @package ANZ\BitUmc\SDK\Core\Contract
  */
-class Reader extends AbstractService
+interface ServiceFactory
 {
 
 }

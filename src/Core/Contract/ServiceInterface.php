@@ -5,18 +5,19 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - AbstractService.php
- * 04.08.2022 01:16
+ * bit-umc-php-sdk - OneCServiceInterface.php
+ * 05.08.2022 23:46
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\OneC;
+
+namespace ANZ\BitUmc\SDK\Core\Contract;
 
 /**
- * Class AbstractService
- * @package ANZ\BitUmc\SDK\Service\OneC
+ * Interface OneCService
+ * @package ANZ\BitUmc\SDK\Core\Contract
  */
-abstract class AbstractService
+interface OneCService
 {
 
 }
