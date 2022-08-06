@@ -5,19 +5,19 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - WsWriter.php
- * 04.08.2022 01:43
+ * bit-umc-php-sdk - Constants.php
+ * 06.08.2022 23:54
  * ==================================================
  */
 
-
-namespace ANZ\BitUmc\SDK\Service\WebService;
+namespace ANZ\BitUmc\SDK\Config;
 
 /**
- * Class WsWriter
- * @package ANZ\BitUmc\SDK\Service\WebService
+ * Class Constants
+ * @package ANZ\BitUmc\SDK\Config
  */
-class WsWriter extends WsCommon
+class Constants
 {
-
+    const WS_SCOPE = 'ws';
+    const HS_SCOPE = 'hs';
 }

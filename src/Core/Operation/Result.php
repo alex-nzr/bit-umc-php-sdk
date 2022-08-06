@@ -5,21 +5,20 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - SoapResult.php
+ * bit-umc-php-sdk - Result.php
  * 05.08.2022 21:41
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Core\Soap;
+namespace ANZ\BitUmc\SDK\Core\Operation;
 
-use ANZ\BitUmc\SDK\Core\Contract\Result;
 use Throwable;
 
 /**
  * Class SoapResult
  * @package ANZ\BitUmc\SDK\Core\Soap
  */
-class SoapResult implements Result
+class Result
 {
     protected bool $isSuccess;
     protected array $errors;
@@ -42,7 +41,7 @@ class SoapResult implements Result
 
     /**
      * @param \Throwable $error
-     * @return \ANZ\BitUmc\SDK\Core\Contract\Result
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function addError(Throwable $error): Result
     {
@@ -74,7 +73,7 @@ class SoapResult implements Result
 
     /**
      * @param array $data
-     * @return \ANZ\BitUmc\SDK\Core\Contract\Result
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function setData(array $data): Result
     {

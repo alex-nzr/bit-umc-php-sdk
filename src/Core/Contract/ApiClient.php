@@ -12,6 +12,8 @@
 
 namespace ANZ\BitUmc\SDK\Core\Contract;
 
+use ANZ\BitUmc\SDK\Core\Operation\Result;
+
 /**
  * Interface ApiClientInterface
  * @package ANZ\BitUmc\SDK\Core\Contract
@@ -19,34 +21,14 @@ namespace ANZ\BitUmc\SDK\Core\Contract;
 interface ApiClient
 {
     /**
-     * @param string $login
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
+     * @return string
      */
-    public function setLogin(string $login): ApiClient;
+    public function getScope(): string;
 
     /**
-     * @param string $password
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
+     * @param string $method
+     * @param array $params
+     * @return mixed
      */
-    public function setPassword(string $password): ApiClient;
-
-    /**
-     * @param bool $enabled
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setHttps(bool $enabled): ApiClient;
-
-    /**
-     * @param string $address
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setAddress(string $address): ApiClient;
-
-    /**
-     * @param string $baseName
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setBaseName(string $baseName): ApiClient;
-
-    public function send(string $method, array $params);
+    public function send(string $method, array $params): Result;
 }

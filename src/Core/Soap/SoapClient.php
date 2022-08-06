@@ -12,6 +12,7 @@
 
 namespace ANZ\BitUmc\SDK\Core\Soap;
 
+use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Tools\XmlParser;
 use Exception;
 use SimpleXMLElement;
@@ -36,11 +37,11 @@ class SoapClient extends \SoapClient
         parent::__construct($wsdl, $options);
     }
 
-    public function send(string $soapMethod, array $params = []): SoapResult
+    public function send(string $soapMethod, array $params = []): Result
     {
         error_reporting(E_ERROR | E_PARSE);
 
-        $result = new SoapResult();
+        $result = new Result();
         try {
             $soapParams = ['parameters' => $params];
 

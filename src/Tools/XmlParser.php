@@ -59,6 +59,66 @@ class XmlParser
         return $clinics;
     }
 
+    public function prepareEmployeesData(SimpleXMLElement $xml): array
+    {
+        $xmlArr = $this->xmlToArray($xml);
+
+        $employeeKey     = "Сотрудник";
+        $organizationKey = "Организация";
+        $nameKey         = "Имя";
+        $lastNameKey     = "Фамилия";
+        $middleNameKey   = "Отчество";
+        $photoKey        = "Фото";
+        $descriptionKey  = "КраткоеОписание";
+        $specialtyKey    = "Специализация";
+        $servicesKey     = "ОсновныеУслуги";
+        $oneServiceKey   = "ОсновнаяУслуга";
+        $durationKey     = "Продолжительность";
+        $ratingKey       = "СреднийРейтинг";
+
+        $employees = [];
+        if (is_array($xmlArr[$employeeKey]))
+        {
+            foreach ($xmlArr[$employeeKey] as $item)
+            {
+                $employee = [];
+                $clinicUid = ($item[$organizationKey] == "00000000-0000-0000-0000-000000000000") ? "" : $item[$organizationKey];
+                $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
+
+                $employee['uid']          = $uid;
+                $employee['name']         = $item[$nameKey];
+                $employee['surname']      = $item[$lastNameKey];
+                $employee['middleName']   = $item[$middleNameKey];
+                $employee['fullName']     = $item[$lastNameKey] ." ". $item[$nameKey] ." ". $item[$middleNameKey];
+                $employee['clinicUid']    = $clinicUid;
+                $employee['photo']        = $item[$photoKey];
+                $employee['description']  = $item[$descriptionKey];
+                $employee['rating']       = $item[$ratingKey];
+                $employee['specialty']    = $item[$specialtyKey];
+                $employee['specialtyUid'] = !empty($item[$specialtyKey]) ? base64_encode($item[$specialtyKey]) : '';
+                $employee['services']     = [];
+
+                if (is_array($item[$servicesKey][$oneServiceKey]))
+                {
+                    foreach ($item[$servicesKey][$oneServiceKey] as $service)
+                    {
+                        if (!empty($service['UID']))
+                        {
+                            $employee['services'][$service['UID']] = [
+                                'uid'              => $service['UID'],
+                                'personalDuration' => strtotime($service[$durationKey])-strtotime('0001-01-01T00:00:00')
+                            ];
+                        }
+                    }
+                }
+
+                $employees[$uid] = $employee;
+            }
+        }
+
+        return $employees;
+    }
+
     /**
      * @param SimpleXMLElement $xml
      * @return array

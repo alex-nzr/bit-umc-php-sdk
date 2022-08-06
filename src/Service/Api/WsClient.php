@@ -8,93 +8,48 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - UmcClient.php
+ * bit-umc-php-sdk - WsClient.php
  * 04.08.2022 02:12
  * ==================================================
  */
 
 namespace ANZ\BitUmc\SDK\Service\Api;
 
+use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
-use ANZ\BitUmc\SDK\Core\Contract\Result;
+use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Core\Soap\SoapClient;
-use ANZ\BitUmc\SDK\Core\Soap\SoapMethod;
 use Exception;
 
 /**
- * Class UmcClient
+ * Class WsClient
  * @package ANZ\BitUmc\SDK\Service\Api
  */
-class UmcClient implements ApiClient
+class WsClient implements ApiClient
 {
-    private string $login;
-    private string $password;
-    private bool   $https;
-    private string $address;
-    private string $baseName;
+    private string     $login;
+    private string     $password;
+    private bool       $https;
+    private string     $address;
+    private string     $baseName;
     private SoapClient $soapClient;
 
-    public static function create(): ApiClient
-    {
-        return new static();
-    }
-
     /**
-     * @param string $login
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setLogin(string $login): ApiClient
-    {
-        $this->login = $login;
-        return $this;
-    }
-
-    /**
-     * @param string $password
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setPassword(string $password): ApiClient
-    {
-        $this->password = $password;
-        return $this;
-    }
-
-    /**
-     * @param bool $enabled
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setHttps(bool $enabled): ApiClient
-    {
-        $this->https = $enabled;
-        return $this;
-    }
-
-    /**
-     * @param string $address
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setAddress(string $address): ApiClient
-    {
-        $this->address = $address;
-        return $this;
-    }
-
-    /**
-     * @param string $baseName
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
-     */
-    public function setBaseName(string $baseName): ApiClient
-    {
-        $this->baseName = $baseName;
-        return $this;
-    }
-
-    /**
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
+     * WsClient constructor.
+     * @param $login
+     * @param $password
+     * @param $https
+     * @param $address
+     * @param $baseName
      * @throws \Exception
      */
-    public function init(): ApiClient
+    public function __construct($login, $password, $https, $address, $baseName)
     {
+        $this->login      = $login;
+        $this->password   = $password;
+        $this->https      = $https;
+        $this->address    = $address;
+        $this->baseName   = $baseName;
         $this->soapClient = new SoapClient(
             $this->getFullBaseUrl(),
             $this->getSoapOptions()
@@ -143,10 +98,18 @@ class UmcClient implements ApiClient
     /**
      * @param string $method
      * @param array $params
-     * @return \ANZ\BitUmc\SDK\Core\Contract\Result
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function send(string $method, array $params = []): Result
     {
         return $this->soapClient->send($method, $params);
+    }
+
+    /**
+     * @return string
+     */
+    public function getScope(): string
+    {
+        return Constants::WS_SCOPE;
     }
 }
