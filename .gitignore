@@ -1,5 +1,4 @@
 # dependencies
-*/**/node_modules/
 /vendor/
 /composer.lock
 
@@ -7,10 +6,6 @@
 */**/build/
 */**/dist/
 
-#example app
-#/app.php
-#/.htaccess
-
 # misc
 /.idea/
-*/**/log.txt
+/log/

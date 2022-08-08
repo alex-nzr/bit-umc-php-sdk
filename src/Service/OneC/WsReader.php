@@ -15,7 +15,7 @@ namespace ANZ\BitUmc\SDK\Service\OneC;
 
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Core\Soap\SoapMethod;
-use Exception;
+use ANZ\BitUmc\SDK\Tools\Utils;
 
 /**
  * Class WsReader
@@ -28,10 +28,6 @@ class WsReader extends Common
      */
     public function getClinics(): Result
     {
-        if (!$this->isWsScope())
-        {
-            return $this->createScopeError();
-        }
         return $this->getResponse(SoapMethod::CLINIC_ACTION_1C);
     }
 
@@ -40,10 +36,25 @@ class WsReader extends Common
      */
     public function getEmployees(): Result
     {
-        if (!$this->isWsScope())
-        {
-            return $this->createScopeError();
-        }
         return $this->getResponse(SoapMethod::EMPLOYEES_ACTION_1C);
+    }
+
+    /**
+     * @param string $clinicGuid
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getNomenclatureList(string $clinicGuid): Result
+    {
+        $params = [
+            'Clinic' => $clinicGuid,
+            'Params' => []
+        ];
+        return $this->getResponse(SoapMethod::NOMENCLATURE_ACTION_1C, $params);
+    }
+
+    public function getSchedule(int $days): Result
+    {
+        $period = Utils::getDateInterval($days);
+        return $this->getResponse(SoapMethod::SCHEDULE_ACTION_1C, $period);
     }
 }

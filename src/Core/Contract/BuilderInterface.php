@@ -18,6 +18,13 @@ namespace ANZ\BitUmc\SDK\Core\Contract;
  */
 interface BuilderInterface
 {
+    /**
+     * @return \ANZ\BitUmc\SDK\Core\Contract\BuilderInterface
+     */
     public static function init(): BuilderInterface;
-    public function build(): mixed;
+
+    /**
+     * @return mixed
+     */
+    public function build();
 }

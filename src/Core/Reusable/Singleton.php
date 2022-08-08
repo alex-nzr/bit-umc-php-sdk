@@ -10,18 +10,23 @@
  * ==================================================
  */
 
-
-namespace ANZ\BitUmc\SDK\Core\Trait;
+namespace ANZ\BitUmc\SDK\Core\Reusable;
 
 /**
  * Trait Singleton
- * @package ANZ\BitUmc\SDK\Core\Trait
+ * @package ANZ\BitUmc\SDK\Core\Reusable
  */
 trait Singleton
 {
-    private static mixed $instance = null;
+    /**
+     * @var mixed|null
+     */
+    private static $instance = null;
 
-    public static function getInstance(): mixed
+    /**
+     * @return mixed
+     */
+    public static function getInstance()
     {
         if (static::$instance === null)
         {

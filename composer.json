@@ -19,13 +19,13 @@
         {
             "name": "Alexey Nazarov",
             "email": "jc1988x@gmail.com",
-            "homepage": "https://alex-nz.ru"
+            "homepage": "https://github.com/alex-nzr"
         }
     ],
     "require": {
-        "php": ">=8.0",
-        "psr/container": "^2.0",
+        "php": ">=7.4",
         "ext-soap": "*",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+        "ext-json": "*"
     }
 }

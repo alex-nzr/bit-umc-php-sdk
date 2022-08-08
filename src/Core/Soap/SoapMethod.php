@@ -20,8 +20,8 @@ class SoapMethod
 {
     const CLINIC_ACTION_1C           = "GetListClinic";
     const EMPLOYEES_ACTION_1C        = "GetListEmployees";
-    const SCHEDULE_ACTION_1C         = "GetSchedule";
     const NOMENCLATURE_ACTION_1C     = "GetNomenclatureAndPrices";
+    const SCHEDULE_ACTION_1C         = "GetSchedule20";
     const CREATE_ORDER_ACTION_1C     = "BookAnAppointmentWithParams";
     const DELETE_ORDER_ACTION_1C     = "CancelBookAnAppointment";
     const CREATE_WAIT_LIST_ACTION_1C = "FastBookAnAppointment";

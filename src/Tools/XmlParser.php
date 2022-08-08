@@ -12,7 +12,7 @@
 
 namespace ANZ\BitUmc\SDK\Tools;
 
-use ANZ\BitUmc\SDK\Core\Trait\Singleton;
+use ANZ\BitUmc\SDK\Core\Reusable\Singleton;
 use SimpleXMLElement;
 
 /**
@@ -117,6 +117,49 @@ class XmlParser
         }
 
         return $employees;
+    }
+
+    /**
+     * @param \SimpleXMLElement $xml
+     * @return array
+     */
+    public function prepareNomenclatureData(SimpleXMLElement $xml): array
+    {
+        $xmlArr = $this->xmlToArray($xml);
+
+        $catalogKey     = "Каталог";
+        $isFolderKey    = "ЭтоПапка";
+        $titleKey       = "Наименование";
+        $typeKey        = "Вид";
+        $artNumberKey   = "Артикул";
+        $priceKey       = "Цена";
+        $durationKey    = "Продолжительность";
+        $measureUnitKey = "БазоваяЕдиницаИзмерения";
+        $parent         = "Родитель";
+
+        $nomenclature = [];
+        if (is_array($xmlArr[$catalogKey]))
+        {
+            foreach ($xmlArr[$catalogKey] as $item)
+            {
+                if ($item[$isFolderKey] === true){
+                    continue;
+                }
+                $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
+
+                $product = [];
+                $product['uid']         = $uid;
+                $product['name']        = $item[$titleKey];
+                $product['typeOfItem']  = $item[$typeKey];
+                $product['artNumber']   = $item[$artNumberKey];
+                $product['price']       = str_replace("[^0-9]", '', $item[$priceKey]);
+                $product['duration']    = Utils::formatDurationToSeconds($item[$durationKey]);
+                $product['measureUnit'] = $item[$measureUnitKey];
+                $product['parent']      = $item[$parent];
+                $nomenclature[$uid]     = $product;
+            }
+        }
+        return $nomenclature;
     }
 
     /**

@@ -15,8 +15,8 @@ namespace ANZ\BitUmc\SDK\Core\Operation;
 use Throwable;
 
 /**
- * Class SoapResult
- * @package ANZ\BitUmc\SDK\Core\Soap
+ * Class Result
+ * @package ANZ\BitUmc\SDK\Core\Operation
  */
 class Result
 {

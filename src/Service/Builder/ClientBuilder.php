@@ -1,5 +1,4 @@
-<?php /** @noinspection PhpPureAttributeCanBeAddedInspection */
-
+<?php
 /**
  * ==================================================
  * Developer: Alexey Nazarov
@@ -119,10 +118,16 @@ class ClientBuilder implements BuilderInterface
             throw new Exception('Can not create client without selected scope');
         }
 
-        $clientClass = match ($this->scope) {
-            Constants::WS_SCOPE => WsClient::class,
-            Constants::HS_SCOPE => HsClient::class,
-        };
+        switch ($this->scope)
+        {
+            case Constants::HS_SCOPE:
+                $clientClass = HsClient::class;
+                break;
+            case Constants::WS_SCOPE:
+            default:
+                $clientClass = WsClient::class;
+                break;
+        }
 
         return new $clientClass( $this->login, $this->password, $this->https, $this->address, $this->baseName );
     }

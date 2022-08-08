@@ -1,7 +1,4 @@
-<?php /** @noinspection PhpSwitchCanBeReplacedWithMatchExpressionInspection */
-/** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
-/** @noinspection PhpPureAttributeCanBeAddedInspection */
-
+<?php
 /**
  * ==================================================
  * Developer: Alexey Nazarov

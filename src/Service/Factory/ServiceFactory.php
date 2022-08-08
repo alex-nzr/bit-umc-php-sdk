@@ -1,6 +1,4 @@
 <?php
-/** @noinspection PhpPureAttributeCanBeAddedInspection */
-
 /**
  * ==================================================
  * Developer: Alexey Nazarov
@@ -17,6 +15,7 @@ namespace ANZ\BitUmc\SDK\Service\Factory;
 use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Contract\FactoryInterface;
+use ANZ\BitUmc\SDK\Service\OneC\Common;
 use ANZ\BitUmc\SDK\Service\OneC\HsReader;
 use ANZ\BitUmc\SDK\Service\OneC\HsWriter;
 use ANZ\BitUmc\SDK\Service\OneC\WsReader;
@@ -42,24 +41,36 @@ class ServiceFactory implements FactoryInterface
     /**
      * @return \ANZ\BitUmc\SDK\Service\OneC\WsReader|\ANZ\BitUmc\SDK\Service\OneC\HsReader
      */
-    public function getReader(): WsReader | HsReader
+    public function getReader(): Common
     {
-        $serviceClass = match ($this->client->getScope()){
-            Constants::WS_SCOPE => WsReader::class,
-            Constants::HS_SCOPE => HsReader::class,
-        };
+        switch ($this->client->getScope())
+        {
+            case Constants::HS_SCOPE:
+                $serviceClass = HsReader::class;
+                break;
+            case Constants::WS_SCOPE:
+            default:
+                $serviceClass = WsReader::class;
+                break;
+        }
         return (new $serviceClass($this->client));
     }
 
     /**
      * @return \ANZ\BitUmc\SDK\Service\OneC\WsWriter|\ANZ\BitUmc\SDK\Service\OneC\HsWriter
      */
-    public function getWriter(): WsWriter | HsWriter
+    public function getWriter(): Common
     {
-        $serviceClass = match ($this->client->getScope()){
-            Constants::WS_SCOPE => WsWriter::class,
-            Constants::HS_SCOPE => HsWriter::class,
-        };
+        switch ($this->client->getScope())
+        {
+            case Constants::HS_SCOPE:
+                $serviceClass = HsWriter::class;
+                break;
+            case Constants::WS_SCOPE:
+            default:
+                $serviceClass = WsWriter::class;
+                break;
+        }
         return (new $serviceClass($this->client));
     }
 }

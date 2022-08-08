@@ -19,7 +19,9 @@ try {
     $reader  = $factory->getReader();
     $writer  = $factory->getWriter();
 
-    $res = $reader->getEmployees();
+    //$res = $reader->getClinics();
+    //$res = $reader->getEmployees();
+    $res = $reader->getNomenclatureList('f679444a-22b7-11df-8618-002618dcef2c');
     if ($res->isSuccess())
     {
         Debug::print('Success', $res->getData());

@@ -15,8 +15,11 @@ namespace ANZ\BitUmc\SDK\Service\Api;
 use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
-use JetBrains\PhpStorm\Pure;
 
+/**
+ * Class HsClient
+ * @package ANZ\BitUmc\SDK\Service\Api
+ */
 class HsClient implements ApiClient
 {
 
@@ -25,7 +28,6 @@ class HsClient implements ApiClient
      * @param array $params
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    #[Pure]
     public function send(string $method, array $params): Result
     {
         return new Result;
