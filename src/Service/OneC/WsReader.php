@@ -43,7 +43,7 @@ class WsReader extends Common
      * @param string $clinicGuid
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    public function getNomenclatureList(string $clinicGuid): Result
+    public function getNomenclature(string $clinicGuid): Result
     {
         $params = [
             'Clinic' => $clinicGuid,
@@ -52,9 +52,21 @@ class WsReader extends Common
         return $this->getResponse(SoapMethod::NOMENCLATURE_ACTION_1C, $params);
     }
 
-    public function getSchedule(int $days): Result
+    /**
+     * @param int $days
+     * @param string $clinicGuid
+     * @param array $employees
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getSchedule(int $days = 14, string $clinicGuid = '', array $employees = []): Result
     {
         $period = Utils::getDateInterval($days);
-        return $this->getResponse(SoapMethod::SCHEDULE_ACTION_1C, $period);
+        $params = array_merge($period, [
+            'Params' => [
+                'Clinic' => $clinicGuid,
+                'Employees' => $employees
+            ]
+        ]);
+        return $this->getResponse(SoapMethod::SCHEDULE_ACTION_1C, $params);
     }
 }

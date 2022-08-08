@@ -94,8 +94,8 @@ class XmlParser
                 $employee['photo']        = $item[$photoKey];
                 $employee['description']  = $item[$descriptionKey];
                 $employee['rating']       = $item[$ratingKey];
-                $employee['specialty']    = $item[$specialtyKey];
-                $employee['specialtyUid'] = !empty($item[$specialtyKey]) ? base64_encode($item[$specialtyKey]) : '';
+                $employee['specialtyName']= $item[$specialtyKey];
+                $employee['specialtyUid'] = $this->getSpecialtyUid($item[$specialtyKey]);
                 $employee['services']     = [];
 
                 if (is_array($item[$servicesKey][$oneServiceKey]))
@@ -169,5 +169,162 @@ class XmlParser
     public function xmlToArray(SimpleXMLElement $xml): array
     {
         return json_decode(json_encode($xml), true);
+    }
+
+    /**
+     * @param SimpleXMLElement $xml
+     * @return array
+     */
+    public function prepareScheduleData(SimpleXMLElement $xml): array
+    {
+        $xmlArr = $this->xmlToArray($xml);
+        $scheduleKey = 'ГрафикДляСайта';
+
+        $schedule = [];
+        if (is_array($xmlArr[$scheduleKey])){
+            $schedule = $this->processScheduleData($xmlArr[$scheduleKey]);
+        }
+        return $schedule;
+    }
+
+    /**
+     * @param array $schedule
+     * @return array
+     */
+    protected function processScheduleData(array $schedule): array
+    {
+        if (Utils::is_assoc($schedule))
+        {
+            $schedule = [$schedule];
+        }
+
+        $employeeUidKey       = "СотрудникID";
+        $employeeFullNameKey  = "СотрудникФИО";
+        $scheduleDurationKey  = "ДлительностьПриема";
+        $schedulePeriodsKey   = "ПериодыГрафика";
+        $scheduleOnePeriodKey = "ПериодГрафика";
+        $scheduleFreeTimeKey  = "СвободноеВремя";
+        $scheduleBusyTimeKey  = "ЗанятоеВремя";
+        $specialtyKey         = "Специализация";
+        $clinicKey            = "Клиника";
+
+        $formattedSchedule = [];
+        foreach ($schedule as $key => $item)
+        {
+            if (isset($item[$employeeFullNameKey])){
+                $formattedSchedule[$key]["employeeName"] = $item[$employeeFullNameKey];
+            }
+            if (isset($item[$employeeUidKey])){
+                $formattedSchedule[$key]["employeeUid"] = $item[$employeeUidKey];
+            }
+            if (isset($item[$specialtyKey])){
+                $formattedSchedule[$key]["specialtyName"]    = $item[$specialtyKey];
+                $formattedSchedule[$key]["specialtyUid"] = $this->getSpecialtyUid($item[$specialtyKey]);
+            }
+            if (isset($item[$clinicKey])){
+                $formattedSchedule[$key]["clinicUid"] = $item[$clinicKey];
+            }
+
+            $duration = 0;
+            if (isset($item[$scheduleDurationKey])){
+                $formattedSchedule[$key]["durationFrom1C"] = $item[$scheduleDurationKey];
+                $duration = intval(date("H", strtotime($item[$scheduleDurationKey]))) * 3600
+                    + intval(date("i", strtotime($item[$scheduleDurationKey]))) * 60;
+                $formattedSchedule[$key]["durationInSeconds"] = $duration;
+            }
+
+            $freeTime = (is_array($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) && count($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) > 0)
+                ? $item[$schedulePeriodsKey][$scheduleFreeTimeKey][$scheduleOnePeriodKey] : [];
+            $busyTime = (is_array($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) && count($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) > 0)
+                ? $item[$schedulePeriodsKey][$scheduleBusyTimeKey][$scheduleOnePeriodKey] : [];
+
+            if (Utils::is_assoc($freeTime)) {
+                $freeTime = [$freeTime];
+            }
+            if (Utils::is_assoc($busyTime)) {
+                $busyTime = [$busyTime];
+            }
+
+            $formattedSchedule[$key]["timetable"]["free"] = $this->formatTimetable($freeTime, $duration);
+            $formattedSchedule[$key]["timetable"]["busy"] = $this->formatTimetable($busyTime, 0, true);
+            $formattedSchedule[$key]["timetable"]["freeNotFormatted"] = $this->formatTimetable($freeTime, 0, true);
+        }
+
+        return $formattedSchedule;
+    }
+
+    public function formatTimetable($array, int $duration, $useDefaultInterval = false): array
+    {
+        if (!is_array($array) || empty($array)){
+            return [];
+        }
+
+        if (!$duration > 0){
+            $duration = 1800;
+        }
+
+        if (!empty($array))
+        {
+            if (Utils::is_assoc($array)) {
+                $array = [$array];
+            }
+
+            $scheduleStartKey = "ВремяНачала";
+            $scheduleEndKey   = "ВремяОкончания";
+
+            $formattedArray = [];
+            foreach ($array as $item)
+            {
+                $timestampTimeBegin = strtotime($item[$scheduleStartKey]);
+                $timestampTimeEnd = strtotime($item[$scheduleEndKey]);
+
+                if ($useDefaultInterval)
+                {
+                    $formattedArray[] = $this->formatTimeTableItem($item, (int)$timestampTimeBegin, (int)$timestampTimeEnd);
+                }
+                else
+                {
+                    $timeDifference = $timestampTimeEnd - $timestampTimeBegin;
+                    $appointmentsCount = round($timeDifference / $duration);
+
+                    for ($i = 0; $i < $appointmentsCount; $i++)
+                    {
+                        $start = $timestampTimeBegin + ($duration * $i);
+                        $end = $timestampTimeBegin + ($duration * ($i+1));
+
+                        $formattedArray[] = $this->formatTimeTableItem($item, (int)$start, (int)$end);
+                    }
+                }
+            }
+            return $formattedArray;
+        }
+        else
+        {
+            return [];
+        }
+    }
+    public function formatTimeTableItem(array $item, int $start, int $end): array
+    {
+        $scheduleDateKey     = "Дата";
+        $scheduleTimeTypeKey = "ВидВремени";
+
+        return [
+            "typeOfTimeUid" => $item[$scheduleTimeTypeKey],
+            "date" => $item[$scheduleDateKey],
+            "timeBegin" => date("Y-m-d", $start) ."T". date("H:i:s", $start),
+            "timeEnd" => date("Y-m-d", $end) ."T". date("H:i:s", $end),
+            "formattedDate" => date("d-m-Y", strtotime($item[$scheduleDateKey])),
+            "formattedTimeBegin" => date("H:i", $start),
+            "formattedTimeEnd" => date("H:i", $end),
+        ];
+    }
+
+    /**
+     * @param string|null $specialtyName
+     * @return string
+     */
+    protected function getSpecialtyUid(?string $specialtyName): string
+    {
+        return !empty($specialtyName) ? base64_encode($specialtyName) : '';
     }
 }

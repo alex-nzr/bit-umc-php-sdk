@@ -16,6 +16,7 @@ use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Tools\XmlParser;
 use Exception;
 use SimpleXMLElement;
+use SoapVar;
 
 /**
  * Class SoapClient
@@ -43,6 +44,11 @@ class SoapClient extends \SoapClient
 
         $result = new Result();
         try {
+            if (is_array($params['Params']))
+            {
+                $params['Params'] = $this->prepareSoapParams($params['Params']);
+            }
+
             $soapParams = ['parameters' => $params];
 
             $response = $this->__soapCall($soapMethod, $soapParams);
@@ -102,5 +108,29 @@ class SoapClient extends \SoapClient
                 throw new Exception('Can not find way to process xml for method - '.$soapMethod.'.');
         }
         return $result;
+    }
+
+    /**
+     * @param array $params
+     * @return SoapVar[]
+     */
+    protected function prepareSoapParams(array $params): array
+    {
+        $soapParams = [];
+        foreach ($params as $key => $param)
+        {
+            $paramValue = $param;
+            if (is_array($param))
+            {
+                $paramValue = implode(';', array_filter($param, function ($val){
+                    return is_string($val);
+                }));
+            }
+            $soapParams[] = new SoapVar(
+                '<ns2:Property name="'.$key.'"><ns2:Value>'.$paramValue.'</ns2:Value></ns2:Property>',
+                XSD_ANYXML
+            );
+        }
+        return $soapParams;
     }
 }

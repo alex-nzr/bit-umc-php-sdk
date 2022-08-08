@@ -21,7 +21,10 @@ try {
 
     //$res = $reader->getClinics();
     //$res = $reader->getEmployees();
-    $res = $reader->getNomenclatureList('f679444a-22b7-11df-8618-002618dcef2c');
+    //$res = $reader->getNomenclature('f679444a-22b7-11df-8618-002618dcef2c');
+    $res = $reader->getSchedule(14, 'f679444a-22b7-11df-8618-002618dcef2c', [
+        '19cb6fa5-1578-11ed-9bee-5c3a455eb0d0', '99868528-0928-11dc-93d1-0004614ae652'
+    ]);
     if ($res->isSuccess())
     {
         Debug::print('Success', $res->getData());
