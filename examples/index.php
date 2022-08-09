@@ -10,9 +10,8 @@ try {
                 ->setLogin('siteIntegration')
                 ->setPassword('123456')
                 ->setHttps(false)
-                ->setAddress('localhost:3500')
+                ->setAddress('localhost:3500')//прописать ошибки для каждого пункта
                 ->setBaseName('umc')
-                ->setWsScope()
                 ->build();
 
     $factory = new ServiceFactory($client);
@@ -22,8 +21,9 @@ try {
     //$res = $reader->getClinics();
     //$res = $reader->getEmployees();
     //$res = $reader->getNomenclature('f679444a-22b7-11df-8618-002618dcef2c');
-    $res = $reader->getSchedule(14, 'f679444a-22b7-11df-8618-002618dcef2c', [
-        '19cb6fa5-1578-11ed-9bee-5c3a455eb0d0', '99868528-0928-11dc-93d1-0004614ae652'
+    $res = $reader->getSchedule(14, /*'f679444a-22b7-11df-8618-002618dcef2c'*/'', [
+        '19cb6fa5-1578-11ed-9bee-5c3a455eb0d0', '99868528-0928-11dc-93d1-0004614ae652',
+        '2eb1f97b-6a3c-11e9-936d-1856809fe650'
     ]);
     if ($res->isSuccess())
     {

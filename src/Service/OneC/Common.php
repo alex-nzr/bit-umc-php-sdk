@@ -12,11 +12,9 @@
 
 namespace ANZ\BitUmc\SDK\Service\OneC;
 
-use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Contract\ServiceInterface;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
-use Exception;
 
 /**
  * Class Common
@@ -25,7 +23,6 @@ use Exception;
 abstract class Common implements ServiceInterface
 {
     protected ApiClient $client;
-    protected string $clientScope;
 
     /**
      * Common constructor.
@@ -33,7 +30,6 @@ abstract class Common implements ServiceInterface
     public function __construct(ApiClient $client)
     {
         $this->client = $client;
-        $this->clientScope = $this->client->getScope();
     }
 
     /**
@@ -44,20 +40,5 @@ abstract class Common implements ServiceInterface
     public function getResponse(string $method, array $params = []): Result
     {
         return $this->client->send($method, $params);
-    }
-
-    protected function isWsScope(): bool
-    {
-        return ($this->clientScope === Constants::WS_SCOPE);
-    }
-
-    protected function isHsScope(): bool
-    {
-        return ($this->clientScope === Constants::HS_SCOPE);
-    }
-
-    protected function createScopeError(): Result
-    {
-        return (new Result())->addError(new Exception('Method not allowed for "'.$this->clientScope.'" scope'));
     }
 }

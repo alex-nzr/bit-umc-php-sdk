@@ -46,38 +46,6 @@ class Utils
     }
 
     /**
-     * creates array of date interval
-     * @param int $interval
-     * @return array
-     */
-    public static function getDateInterval(int $interval): array
-    {
-        $start  = self::formatDateToISO(strtotime('today + 1 days'));
-        $end    = self::formatDateToISO(strtotime('today + ' . $interval . ' days'));
-        return [
-            "StartDate" => $start,
-            "FinishDate" => $end,
-        ];
-    }
-
-    /**
-     * formatting timestamp to ISO
-     * @param int $timestamp
-     * @return string
-     */
-    public static function formatDateToISO(int $timestamp): string
-    {
-        return (new DateTime())->setTimestamp($timestamp)->format('Y-m-d\TH:i:s');
-    }
-
-    public static function formatDurationToSeconds(string $isoTime): int
-    {
-        $minutes = date("i", strtotime($isoTime));
-        $hours = date("H", strtotime($isoTime));
-        return (int)$minutes*60 + (int)$hours*3600;
-    }
-
-    /**
      * Tests if an array is associative or not.
      * @param array array to check
      * @return boolean

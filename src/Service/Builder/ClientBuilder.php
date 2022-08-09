@@ -12,7 +12,6 @@
 
 namespace ANZ\BitUmc\SDK\Service\Builder;
 
-use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Contract\BuilderInterface;
 use ANZ\BitUmc\SDK\Service\Api\HsClient;
@@ -30,11 +29,12 @@ class ClientBuilder implements BuilderInterface
     private bool   $https;
     private string $address;
     private string $baseName;
-    private string $scope;
+    private string $useHsScope;
 
     public function __construct()
     {
-        $this->scope = Constants::WS_SCOPE;
+        $this->https      = false;
+        $this->useHsScope = false;
     }
 
     /**
@@ -95,15 +95,9 @@ class ClientBuilder implements BuilderInterface
         return $this;
     }
 
-    public function setWsScope(): ClientBuilder
-    {
-        $this->scope = Constants::WS_SCOPE;
-        return $this;
-    }
-
     public function setHsScope(): ClientBuilder
     {
-        $this->scope = Constants::HS_SCOPE;
+        $this->useHsScope = true;
         return $this;
     }
 
@@ -113,22 +107,38 @@ class ClientBuilder implements BuilderInterface
      */
     public function build(): ApiClient
     {
-        if (empty($this->scope))
-        {
-            throw new Exception('Can not create client without selected scope');
-        }
+        $this->checkFields();
 
-        switch ($this->scope)
+        if($this->useHsScope)
         {
-            case Constants::HS_SCOPE:
-                $clientClass = HsClient::class;
-                break;
-            case Constants::WS_SCOPE:
-            default:
-                $clientClass = WsClient::class;
-                break;
+            $clientClass = HsClient::class;
+        }
+        else
+        {
+            $clientClass = WsClient::class;
         }
 
         return new $clientClass( $this->login, $this->password, $this->https, $this->address, $this->baseName );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function checkFields(): void
+    {
+        if (empty($this->login)){
+            throw new Exception("Can not init client without login");
+        }
+        if (empty($this->password)){
+            throw new Exception("Can not init client without password");
+        }
+        if (empty($this->address))
+        {
+            throw new Exception("Can not create client without 1c base's publication address");
+        }
+        if (empty($this->baseName))
+        {
+            throw new Exception("Can not create client without name of 1c base");
+        }
     }
 }

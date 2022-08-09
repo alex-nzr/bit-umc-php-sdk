@@ -21,14 +21,14 @@ use ANZ\BitUmc\SDK\Core\Operation\Result;
 interface ApiClient
 {
     /**
-     * @return string
+     * @return bool
      */
-    public function getScope(): string;
+    public function isHsScope(): bool;
 
     /**
      * @param string $method
      * @param array $params
-     * @return mixed
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function send(string $method, array $params): Result;
 }

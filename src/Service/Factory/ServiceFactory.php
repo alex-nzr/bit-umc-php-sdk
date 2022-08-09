@@ -12,7 +12,6 @@
 
 namespace ANZ\BitUmc\SDK\Service\Factory;
 
-use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Contract\FactoryInterface;
 use ANZ\BitUmc\SDK\Service\OneC\Common;
@@ -43,15 +42,13 @@ class ServiceFactory implements FactoryInterface
      */
     public function getReader(): Common
     {
-        switch ($this->client->getScope())
+        if($this->client->isHsScope())
         {
-            case Constants::HS_SCOPE:
-                $serviceClass = HsReader::class;
-                break;
-            case Constants::WS_SCOPE:
-            default:
-                $serviceClass = WsReader::class;
-                break;
+            $serviceClass = HsReader::class;
+        }
+        else
+        {
+            $serviceClass = WsReader::class;
         }
         return (new $serviceClass($this->client));
     }
@@ -61,15 +58,13 @@ class ServiceFactory implements FactoryInterface
      */
     public function getWriter(): Common
     {
-        switch ($this->client->getScope())
+        if($this->client->isHsScope())
         {
-            case Constants::HS_SCOPE:
-                $serviceClass = HsWriter::class;
-                break;
-            case Constants::WS_SCOPE:
-            default:
-                $serviceClass = WsWriter::class;
-                break;
+            $serviceClass = HsWriter::class;
+        }
+        else
+        {
+            $serviceClass = WsWriter::class;
         }
         return (new $serviceClass($this->client));
     }

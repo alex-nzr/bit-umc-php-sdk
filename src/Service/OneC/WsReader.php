@@ -15,6 +15,7 @@ namespace ANZ\BitUmc\SDK\Service\OneC;
 
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Core\Soap\SoapMethod;
+use ANZ\BitUmc\SDK\Tools\DateTime;
 use ANZ\BitUmc\SDK\Tools\Utils;
 
 /**
@@ -60,7 +61,7 @@ class WsReader extends Common
      */
     public function getSchedule(int $days = 14, string $clinicGuid = '', array $employees = []): Result
     {
-        $period = Utils::getDateInterval($days);
+        $period = $this->getIntervalParams($days);
         $params = array_merge($period, [
             'Params' => [
                 'Clinic' => $clinicGuid,
@@ -68,5 +69,20 @@ class WsReader extends Common
             ]
         ]);
         return $this->getResponse(SoapMethod::SCHEDULE_ACTION_1C, $params);
+    }
+
+    /**
+     * creates array of date interval
+     * @param int $intervalDays
+     * @return array
+     */
+    protected function getIntervalParams(int $intervalDays): array
+    {
+        $start  = DateTime::formatTimestampToISO(strtotime('today + 1 days'));//сделать через Date
+        $end    = DateTime::formatTimestampToISO(strtotime('today + ' . $intervalDays . ' days'));
+        return [
+            "StartDate" => $start,
+            "FinishDate" => $end,
+        ];
     }
 }

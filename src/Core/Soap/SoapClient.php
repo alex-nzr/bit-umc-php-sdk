@@ -40,8 +40,6 @@ class SoapClient extends \SoapClient
 
     public function send(string $soapMethod, array $params = []): Result
     {
-        error_reporting(E_ERROR | E_PARSE);
-
         $result = new Result();
         try {
             if (is_array($params['Params']))
@@ -55,7 +53,7 @@ class SoapClient extends \SoapClient
 
             if (is_object($response) && property_exists($response, 'return'))
             {
-                $xml = new SimpleXMLElement($response->return);
+                $xml = @(new SimpleXMLElement($response->return));
                 $data = $this->handleXML($soapMethod, $xml);
                 $result->setData($data);
             }

@@ -153,7 +153,7 @@ class XmlParser
                 $product['typeOfItem']  = $item[$typeKey];
                 $product['artNumber']   = $item[$artNumberKey];
                 $product['price']       = str_replace("[^0-9]", '', $item[$priceKey]);
-                $product['duration']    = Utils::formatDurationToSeconds($item[$durationKey]);
+                $product['duration']    = DateTime::formatDurationFromIsoToSeconds($item[$durationKey]);
                 $product['measureUnit'] = $item[$measureUnitKey];
                 $product['parent']      = $item[$parent];
                 $nomenclature[$uid]     = $product;
@@ -209,45 +209,85 @@ class XmlParser
         $clinicKey            = "Клиника";
 
         $formattedSchedule = [];
-        foreach ($schedule as $key => $item)
+        foreach ($schedule as $item)
         {
-            if (isset($item[$employeeFullNameKey])){
-                $formattedSchedule[$key]["employeeName"] = $item[$employeeFullNameKey];
-            }
-            if (isset($item[$employeeUidKey])){
-                $formattedSchedule[$key]["employeeUid"] = $item[$employeeUidKey];
-            }
-            if (isset($item[$specialtyKey])){
-                $formattedSchedule[$key]["specialtyName"]    = $item[$specialtyKey];
-                $formattedSchedule[$key]["specialtyUid"] = $this->getSpecialtyUid($item[$specialtyKey]);
-            }
-            if (isset($item[$clinicKey])){
-                $formattedSchedule[$key]["clinicUid"] = $item[$clinicKey];
-            }
+            if (!empty($item[$clinicKey]))
+            {
+                $clinicUid = $item[$clinicKey];
+                if (!is_array($formattedSchedule[$clinicUid]))
+                {
+                    $formattedSchedule[$clinicUid] = [];
+                }
 
-            $duration = 0;
-            if (isset($item[$scheduleDurationKey])){
-                $formattedSchedule[$key]["durationFrom1C"] = $item[$scheduleDurationKey];
-                $duration = intval(date("H", strtotime($item[$scheduleDurationKey]))) * 3600
-                    + intval(date("i", strtotime($item[$scheduleDurationKey]))) * 60;
-                $formattedSchedule[$key]["durationInSeconds"] = $duration;
-            }
+                if (!empty($item[$specialtyKey])){
+                    $specialtyName = $item[$specialtyKey];
+                    $specialtyUid  = $this->getSpecialtyUid($item[$specialtyKey]);
 
-            $freeTime = (is_array($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) && count($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) > 0)
-                ? $item[$schedulePeriodsKey][$scheduleFreeTimeKey][$scheduleOnePeriodKey] : [];
-            $busyTime = (is_array($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) && count($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) > 0)
-                ? $item[$schedulePeriodsKey][$scheduleBusyTimeKey][$scheduleOnePeriodKey] : [];
+                    if (!is_array($formattedSchedule[$clinicUid][$specialtyUid]))
+                    {
+                        $formattedSchedule[$clinicUid][$specialtyUid] = [];
+                    }
 
-            if (Utils::is_assoc($freeTime)) {
-                $freeTime = [$freeTime];
-            }
-            if (Utils::is_assoc($busyTime)) {
-                $busyTime = [$busyTime];
-            }
+                    if (!empty($item[$employeeUidKey]))
+                    {
+                        $employeeUid     = $item[$employeeUidKey];
+                        $employeeName    = $item[$employeeFullNameKey];
 
-            $formattedSchedule[$key]["timetable"]["free"] = $this->formatTimetable($freeTime, $duration);
-            $formattedSchedule[$key]["timetable"]["busy"] = $this->formatTimetable($busyTime, 0, true);
-            $formattedSchedule[$key]["timetable"]["freeNotFormatted"] = $this->formatTimetable($freeTime, 0, true);
+                        $durationSeconds = 1800;//default duration = 30min
+                        $durationFrom1C  = '';
+                        if (!empty($item[$scheduleDurationKey]))
+                        {
+                            $durationFrom1C  = $item[$scheduleDurationKey];
+                            $durationSeconds = intval(date("H", strtotime($durationFrom1C))) * 3600
+                                + intval(date("i", strtotime($durationFrom1C))) * 60;
+                        }
+
+                        if (empty($formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]))
+                        {
+                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid] = [
+                                'specialtyName'     => $specialtyName,
+                                'employeeName'      => $employeeName,
+                                'durationFrom1C'    => $durationFrom1C,
+                                'durationInSeconds' => $durationSeconds,
+                                'timetable'         => [
+                                    'freeFormatted' => [],
+                                    'busy'          => [],
+                                    'free'          => [],
+                                ]
+                            ];
+                        }
+
+                        $timetable = [];
+
+                        $freeTime = (is_array($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) && count($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) > 0)
+                            ? $item[$schedulePeriodsKey][$scheduleFreeTimeKey][$scheduleOnePeriodKey] : [];
+                        $busyTime = (is_array($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) && count($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) > 0)
+                            ? $item[$schedulePeriodsKey][$scheduleBusyTimeKey][$scheduleOnePeriodKey] : [];
+
+                        if (Utils::is_assoc($freeTime)) {
+                            $freeTime = [$freeTime];
+                        }
+                        if (Utils::is_assoc($busyTime)) {
+                            $busyTime = [$busyTime];
+                        }
+
+                        $timetable["free"] = array_merge(
+                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["free"],
+                            $this->formatTimetable($freeTime, 0, true)
+                        );
+                        $timetable["busy"] = array_merge(
+                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["busy"],
+                            $this->formatTimetable($busyTime, 0, true)
+                        );
+                        $timetable["freeFormatted"] = array_merge(
+                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["freeFormatted"],
+                            $this->formatTimetable($freeTime, $durationSeconds)
+                        );
+
+                        $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable'] = $timetable;
+                    }
+                }
+            }
         }
 
         return $formattedSchedule;
@@ -269,6 +309,7 @@ class XmlParser
                 $array = [$array];
             }
 
+            $scheduleDateKey  = "Дата";
             $scheduleStartKey = "ВремяНачала";
             $scheduleEndKey   = "ВремяОкончания";
 
@@ -280,7 +321,15 @@ class XmlParser
 
                 if ($useDefaultInterval)
                 {
-                    $formattedArray[] = $this->formatTimeTableItem($item, (int)$timestampTimeBegin, (int)$timestampTimeEnd);
+                    $newTimeTableItem = $this->formatTimeTableItem($item, (int)$timestampTimeBegin, (int)$timestampTimeEnd);
+                    if (!is_array($formattedArray[$item[$scheduleDateKey]]))
+                    {
+                        $formattedArray[$item[$scheduleDateKey]] = [$newTimeTableItem];
+                    }
+                    else
+                    {
+                        $formattedArray[$item[$scheduleDateKey]][] = $newTimeTableItem;
+                    }
                 }
                 else
                 {
@@ -292,7 +341,15 @@ class XmlParser
                         $start = $timestampTimeBegin + ($duration * $i);
                         $end = $timestampTimeBegin + ($duration * ($i+1));
 
-                        $formattedArray[] = $this->formatTimeTableItem($item, (int)$start, (int)$end);
+                        $newTimeTableItem = $this->formatTimeTableItem($item, (int)$start, (int)$end);
+                        if (!is_array($formattedArray[$item[$scheduleDateKey]]))
+                        {
+                            $formattedArray[$item[$scheduleDateKey]] = [$newTimeTableItem];
+                        }
+                        else
+                        {
+                            $formattedArray[$item[$scheduleDateKey]][] = $newTimeTableItem;
+                        }
                     }
                 }
             }

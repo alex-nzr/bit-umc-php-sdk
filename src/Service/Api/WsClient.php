@@ -12,7 +12,6 @@
 
 namespace ANZ\BitUmc\SDK\Service\Api;
 
-use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Core\Soap\SoapClient;
@@ -69,10 +68,6 @@ class WsClient implements ApiClient
      */
     private function getSoapOptions(): array
     {
-        if (empty($this->login) || empty($this->password)){
-            throw new Exception('Can not init client without login or password');
-        }
-
         return [
             'login'          => $this->login,
             'password'       => $this->password,
@@ -103,10 +98,10 @@ class WsClient implements ApiClient
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getScope(): string
+    public function isHsScope(): bool
     {
-        return Constants::WS_SCOPE;
+        return false;
     }
 }

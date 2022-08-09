@@ -12,7 +12,6 @@
 
 namespace ANZ\BitUmc\SDK\Service\Api;
 
-use ANZ\BitUmc\SDK\Config\Constants;
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
@@ -34,10 +33,10 @@ class HsClient implements ApiClient
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getScope(): string
+    public function isHsScope(): bool
     {
-        return Constants::HS_SCOPE;
+        return true;
     }
 }
