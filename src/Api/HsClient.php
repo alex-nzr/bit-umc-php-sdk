@@ -10,14 +10,14 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\Api;
+namespace ANZ\BitUmc\SDK\Api;
 
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
  * Class HsClient
- * @package ANZ\BitUmc\SDK\Service\Api
+ * @package ANZ\BitUmc\SDK\Api
  */
 class HsClient implements ApiClient
 {

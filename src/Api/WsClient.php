@@ -10,16 +10,15 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\Api;
+namespace ANZ\BitUmc\SDK\Api;
 
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Core\Soap\SoapClient;
-use Exception;
 
 /**
  * Class WsClient
- * @package ANZ\BitUmc\SDK\Service\Api
+ * @package ANZ\BitUmc\SDK\Api
  */
 class WsClient implements ApiClient
 {

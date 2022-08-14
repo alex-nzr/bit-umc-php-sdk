@@ -78,11 +78,23 @@ class WsReader extends Common
      */
     protected function getIntervalParams(int $intervalDays): array
     {
-        $start  = DateTime::formatTimestampToISO(strtotime('today + 1 days'));//сделать через Date
+        $start  = DateTime::formatTimestampToISO(strtotime('today + 1 days'));
         $end    = DateTime::formatTimestampToISO(strtotime('today + ' . $intervalDays . ' days'));
         return [
             "StartDate" => $start,
             "FinishDate" => $end,
         ];
+    }
+
+    /**
+     * @param string $orderUid
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getOrderStatus(string $orderUid): Result
+    {
+        $params = [
+            'GUID' => $orderUid
+        ];
+        return $this->getResponse(SoapMethod::GET_ORDER_STATUS_ACTION_1C, $params);
     }
 }

@@ -14,8 +14,8 @@ namespace ANZ\BitUmc\SDK\Service\Builder;
 
 use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
 use ANZ\BitUmc\SDK\Core\Contract\BuilderInterface;
-use ANZ\BitUmc\SDK\Service\Api\HsClient;
-use ANZ\BitUmc\SDK\Service\Api\WsClient;
+use ANZ\BitUmc\SDK\Api\HsClient;
+use ANZ\BitUmc\SDK\Api\WsClient;
 use Exception;
 
 /**

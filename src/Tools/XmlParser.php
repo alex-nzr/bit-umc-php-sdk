@@ -293,6 +293,12 @@ class XmlParser
         return $formattedSchedule;
     }
 
+    /**
+     * @param $array
+     * @param int $duration
+     * @param false $useDefaultInterval
+     * @return array
+     */
     public function formatTimetable($array, int $duration, $useDefaultInterval = false): array
     {
         if (!is_array($array) || empty($array)){
@@ -360,6 +366,13 @@ class XmlParser
             return [];
         }
     }
+
+    /**
+     * @param array $item
+     * @param int $start
+     * @param int $end
+     * @return array
+     */
     public function formatTimeTableItem(array $item, int $start, int $end): array
     {
         $scheduleDateKey     = "Дата";
@@ -383,5 +396,29 @@ class XmlParser
     protected function getSpecialtyUid(?string $specialtyName): string
     {
         return !empty($specialtyName) ? base64_encode($specialtyName) : '';
+    }
+
+    /**
+     * @param \SimpleXMLElement $xml
+     * @return array|string[]
+     * @throws \Exception
+     */
+    public function prepareReserveResultData(SimpleXMLElement $xml): array
+    {
+        $xmlArr = $this->xmlToArray($xml);
+
+        $commonResKey        = 'Результат';
+        $commonErrDescKey    = 'ОписаниеОшибки';
+        $commonBookingUidKey = 'УИД';
+
+        if ($xmlArr[$commonResKey] === "true" && !empty($xmlArr[$commonBookingUidKey]))
+        {
+            return [
+                'uid'  => $xmlArr[$commonBookingUidKey]
+            ];
+        }
+        else {
+            throw new \Exception((string)$xmlArr[$commonErrDescKey]);
+        }
     }
 }
