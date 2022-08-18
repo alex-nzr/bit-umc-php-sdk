@@ -13,16 +13,27 @@
 namespace ANZ\BitUmc\SDK\Tools;
 
 use ANZ\BitUmc\SDK\Core\Reusable\Singleton;
+use Exception;
 use SimpleXMLElement;
 
 /**
  * Class XmlParser
  * @package ANZ\BitUmc\SDK\Tools
+ *
  * @method static XmlParser getInstance()
  */
 class XmlParser
 {
     use Singleton;
+
+    /**
+     * @param SimpleXMLElement $xml
+     * @return array
+     */
+    public function xmlToArray(SimpleXMLElement $xml): array
+    {
+        return json_decode(json_encode($xml), true);
+    }
 
     /**
      * @param \SimpleXMLElement $xml
@@ -59,6 +70,10 @@ class XmlParser
         return $clinics;
     }
 
+    /**
+     * @param \SimpleXMLElement $xml
+     * @return array
+     */
     public function prepareEmployeesData(SimpleXMLElement $xml): array
     {
         $xmlArr = $this->xmlToArray($xml);
@@ -160,15 +175,6 @@ class XmlParser
             }
         }
         return $nomenclature;
-    }
-
-    /**
-     * @param SimpleXMLElement $xml
-     * @return array
-     */
-    public function xmlToArray(SimpleXMLElement $xml): array
-    {
-        return json_decode(json_encode($xml), true);
     }
 
     /**
@@ -390,15 +396,6 @@ class XmlParser
     }
 
     /**
-     * @param string|null $specialtyName
-     * @return string
-     */
-    protected function getSpecialtyUid(?string $specialtyName): string
-    {
-        return !empty($specialtyName) ? base64_encode($specialtyName) : '';
-    }
-
-    /**
      * @param \SimpleXMLElement $xml
      * @return array|string[]
      * @throws \Exception
@@ -418,7 +415,66 @@ class XmlParser
             ];
         }
         else {
-            throw new \Exception((string)$xmlArr[$commonErrDescKey]);
+            throw new Exception((string)$xmlArr[$commonErrDescKey]);
         }
+    }
+
+    /**
+     * Parse result for add order, delete order and add wait list requests
+     * @param \SimpleXMLElement $xml
+     * @return array
+     * @throws \Exception
+     */
+    public function prepareCommonResultData(SimpleXMLElement $xml): array
+    {
+        $xmlArr = $this->xmlToArray($xml);
+        $commonResKey     = "Результат";
+        $commonErrDescKey = "ОписаниеОшибки";
+
+        if ($xmlArr[$commonResKey] === "true"){
+            return ['success' => true];
+        }
+        else {
+            throw new Exception((string)$xmlArr[$commonErrDescKey]);
+        }
+    }
+
+    /**
+     * @param \SimpleXMLElement $xml
+     * @return array
+     * @throws \Exception
+     */
+    public function prepareStatusResultData(SimpleXMLElement $xml): array
+    {
+        $xmlArr = $this->xmlToArray($xml);
+
+        $commonResKey       = "Результат";
+        $commonResDescKey   = "ОписаниеРезультата";
+        $commonErrDescKey   = "ОписаниеОшибки";
+        $reservedStatusText = "Забронирована";
+
+        if ((int)$xmlArr[$commonResKey] > 0)
+        {
+            $statusCode  = $xmlArr[$commonResKey];
+            $statusTitle = ((int)$statusCode === 9) ? $reservedStatusText : $xmlArr[$commonResDescKey];
+
+            return [
+                'success'   => true,
+                'statusId'  => $xmlArr[$commonResKey],
+                'status'    => (is_array($statusTitle)) ? implode("; ", $statusTitle) : $statusTitle,
+            ];
+        }
+        else {
+            throw new Exception($xmlArr[$commonResKey] ." - ". $xmlArr[$commonErrDescKey]);
+        }
+    }
+
+    /**
+     * @param string|null $specialtyName
+     * @return string
+     */
+    protected function getSpecialtyUid(?string $specialtyName): string
+    {
+        return !empty($specialtyName) ? base64_encode($specialtyName) : '';
     }
 }

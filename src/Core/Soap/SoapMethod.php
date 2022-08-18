@@ -14,7 +14,7 @@ namespace ANZ\BitUmc\SDK\Core\Soap;
 
 /**
  * Class SoapMethod
- * @package ANZ\BitUmc\SDK\Service\Api
+ * @package ANZ\BitUmc\SDK\Core\Soap
  */
 class SoapMethod
 {

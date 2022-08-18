@@ -14,7 +14,8 @@ namespace ANZ\BitUmc\SDK\Service\OneC;
 
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Core\Soap\SoapMethod;
-use ANZ\BitUmc\SDK\Service\Builder\OrderBuilder;
+use ANZ\BitUmc\SDK\Entity\Order;
+use ANZ\BitUmc\SDK\Tools\Utils;
 
 /**
  * Class WsWriter
@@ -23,37 +24,11 @@ use ANZ\BitUmc\SDK\Service\Builder\OrderBuilder;
 class WsWriter extends Common
 {
     /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
-     */
-    public function createWaitList(): OrderBuilder
-    {
-        return new OrderBuilder(OrderBuilder::WAIT_LIST_MODE);
-    }
-
-    /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
-     */
-    public function createReserve(): OrderBuilder
-    {
-        return new OrderBuilder(OrderBuilder::RESERVE_MODE);
-    }
-
-    /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
-     */
-    public function createOrder(): OrderBuilder
-    {
-        return new OrderBuilder(OrderBuilder::ORDER_MODE);
-    }
-
-    /**
-     * @param \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder $builder
+     * @param \ANZ\BitUmc\SDK\Entity\Order $reserve
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
-     * @throws \Exception
      */
-    public function sendReserve(OrderBuilder $builder): Result
+    public function sendReserve(Order $reserve): Result
     {
-        $reserve = $builder->build();
         $params = [
             'Specialization' => $reserve->getSpecialtyName(),
             'Date'           => $reserve->getDate(),
@@ -63,41 +38,31 @@ class WsWriter extends Common
         ];
         return $this->getResponse(SoapMethod::CREATE_RESERVE_ACTION_1C, $params);
     }
+
+    /**
+     * @param \ANZ\BitUmc\SDK\Entity\Order $waitList
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function sendWaitList(Order $waitList): Result
+    {
+        $params = [
+            'Specialization'    => $waitList->getSpecialtyName(),
+            'PatientSurname'    => $waitList->getLastName(),
+            'PatientName'       => $waitList->getName(),
+            'PatientFatherName' => $waitList->getSecondName(),
+            'Date'              => $waitList->getDate(),
+            'TimeBegin'         => $waitList->getTimeBegin(),
+            'Phone'             => Utils::formatPhone($waitList->getPhone()),
+            'Email'             => $waitList->getEmail(),
+            'Address'           => $waitList->getAddress(),
+            'Clinic'            => $waitList->getClinicUid(),
+            'Comment'           => $waitList->getComment(),
+        ];
+        return $this->getResponse(SoapMethod::CREATE_WAIT_LIST_ACTION_1C, $params);
+    }
 }
 
-/*if ($this->useWaitList)
-{
-    $paramsToSend = [
-        'Specialization'    => $params['specialty'] ?? "",
-        'PatientSurname'    => $params['surname'],
-        'PatientName'       => $params['name'],
-        'PatientFatherName' => $params['middleName'],
-        'Date'              => $params['orderDate'],
-        'TimeBegin'         => $params['timeBegin'],
-        'Phone'             => Utils::formatPhone($params['phone']),
-        'Email'             => $params['email'] ?? '',
-        'Address'           => $params['address'] ?? '',
-        'Clinic'            => $params['clinicUid'],
-        'Comment'           => Loc::getMessage('ANZ_APPOINTMENT_WAITING_LIST_COMMENT', [
-            '#FULL_NAME#' => $params['name'] ." ". $params['middleName'] ." ". $params['surname'],
-            '#PHONE#'     => Utils::formatPhone($params['phone']),
-            '#DATE#'      => date("d.m.Y", strtotime($params['orderDate'])),
-            '#TIME#'      => date("H:i", strtotime($params['timeBegin'])),
-            '#COMMENT#'   => $params['comment'] ?? '',
-        ]),
-    ];
-}
-elseif ($this->useReserve)
-{
-    $paramsToReserve = [
-        'Specialization' => $this->specialty,
-        'Date'           => $this->date,
-        'TimeBegin'      => $this->timeBegin,
-        'EmployeeID'     => $this->employeeUid,
-        'Clinic'         => $this->clinicUid,
-    ];
-    return new Reserve($specialty, $date, $start, $employee, $clinic);
-}
+/*
 elseif($this->useOrder)
 {
     $paramsToSend = [

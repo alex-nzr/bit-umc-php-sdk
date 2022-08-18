@@ -53,9 +53,16 @@ class SoapClient extends \SoapClient
 
             if (is_object($response) && property_exists($response, 'return'))
             {
-                $xml = @(new SimpleXMLElement($response->return));
-                $data = $this->handleXML($soapMethod, $xml);
-                $result->setData($data);
+                try
+                {
+                    $xml = @(new SimpleXMLElement($response->return));
+                    $data = $this->handleXML($soapMethod, $xml);
+                    $result->setData($data);
+                }
+                catch (Exception $e)
+                {
+                    throw new Exception("Error on parsing xml from response. Response data: " . $response->return);
+                }
             }
             else
             {

@@ -42,9 +42,13 @@ class OrderBuilder implements BuilderInterface
     private string $address = '';
     private string $comment = '';
     private string $reserveUid = '';
-    private array   $orderAdditionalParams = [];
+    private array  $orderAdditionalParams = [];
 
-    private array $requiredReserveParams = [ 'date', 'timeBegin', 'employeeUid', 'clinicUid' ];
+    private array $requiredReserveParams  = [ 'date', 'timeBegin', 'employeeUid', 'clinicUid' ];
+    private array $requiredWaitListParams = [
+        'date', 'timeBegin', 'clinicUid',
+        'name', 'lastName', 'secondName',  'phone'
+    ];
 
     public function __construct(?string $mode = null)
     {
@@ -63,6 +67,22 @@ class OrderBuilder implements BuilderInterface
     public static function init(): OrderBuilder
     {
         return new static();
+    }
+
+    /**
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public static function createWaitList(): OrderBuilder
+    {
+        return new static(static::WAIT_LIST_MODE);
+    }
+
+    /**
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public static function createReserve(): OrderBuilder
+    {
+        return new static(static::RESERVE_MODE);
     }
 
     /**
@@ -118,23 +138,103 @@ class OrderBuilder implements BuilderInterface
     }
 
     /**
+     * @param string $name
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setName(string $name): OrderBuilder
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @param string $lastName
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setLastName(string $lastName): OrderBuilder
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
+
+    /**
+     * @param string $secondName
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setSecondName(string $secondName): OrderBuilder
+    {
+        $this->secondName = $secondName;
+        return $this;
+    }
+
+    /**
+     * @param string $phone
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setPhone(string $phone): OrderBuilder
+    {
+        $this->phone = $phone;
+        return $this;
+    }
+
+    /**
+     * @param string $email
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setEmail(string $email): OrderBuilder
+    {
+        $this->email = $email;
+        return $this;
+    }
+
+    /**
+     * @param string $address
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setAddress(string $address): OrderBuilder
+    {
+        $this->address = $address;
+        return $this;
+    }
+
+    /**
+     * @param string $comment
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setComment(string $comment): OrderBuilder
+    {
+        $this->comment = $comment;
+        return $this;
+    }
+
+    /**
+     * @param string $reserveUid
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setReserveUid(string $reserveUid): OrderBuilder
+    {
+        $this->reserveUid = $reserveUid;
+        return $this;
+    }
+
+    /**
+     * @param int $seconds
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setDuration(int $seconds): OrderBuilder
+    {
+        //$this->orderAdditionalParams['Duration'] = ...
+        return $this;
+    }
+
+    /**
      * @return \ANZ\BitUmc\SDK\Entity\Order
      * @throws \Exception
      */
     public function build(): Order
     {
-        switch ($this->mode)
-        {
-            case static::WAIT_LIST_MODE:
-                $this->checkWaitListParams();
-                break;
-            case static::RESERVE_MODE:
-                $this->checkReserveParams();
-                break;
-            case static::ORDER_MODE:
-                $this->checkOrderParams();
-                break;
-        }
+        $this->checkRequiredParams();
+        $this->checkAndFillNotRequiredParams();
 
         return new Order(
             $this->specialtyName,
@@ -157,16 +257,44 @@ class OrderBuilder implements BuilderInterface
     /**
      * @throws \Exception
      */
-    public function checkReserveParams()
+    protected function checkRequiredParams()
     {
-        foreach ($this->requiredReserveParams as $param) {
+        $params = [];
+        switch ($this->mode)
+        {
+            case static::WAIT_LIST_MODE:
+                $params = $this->requiredWaitListParams;
+                break;
+            case static::RESERVE_MODE:
+                $params = $this->requiredReserveParams;
+                break;
+            case static::ORDER_MODE:
+                $params = $this->requiredOrderParams;
+                break;
+        }
+        foreach ($params as $param) {
             if (empty($this->$param)){
                 throw new Exception('Required params ' . $param . ' is empty');
             }
         }
+    }
 
+    /**
+     * @return void
+     */
+    protected function checkAndFillNotRequiredParams(): void
+    {
         if (empty($this->specialtyName)){
             $this->specialtyName = '';
+        }
+        if (empty($this->email)){
+            $this->email = '';
+        }
+        if (empty($this->address)){
+            $this->address = '';
+        }
+        if (empty($this->comment)){
+            $this->comment = '';
         }
     }
 }
