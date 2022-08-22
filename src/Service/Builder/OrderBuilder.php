@@ -14,6 +14,7 @@ namespace ANZ\BitUmc\SDK\Service\Builder;
 
 use ANZ\BitUmc\SDK\Core\Contract\BuilderInterface;
 use ANZ\BitUmc\SDK\Entity\Order;
+use ANZ\BitUmc\SDK\Tools\Utils;
 use DateTime;
 use Exception;
 
@@ -29,28 +30,38 @@ class OrderBuilder implements BuilderInterface
 
     private string $mode;
 
-    private string $specialtyName = '';
-    private string $date = '';
-    private string $timeBegin = '';
-    private string $employeeUid = '';
-    private string $clinicUid = '';
-    private string $name = '';
-    private string $lastName = '';
-    private string $secondName = '';
-    private string $phone = '';
-    private string $email = '';
-    private string $address = '';
-    private string $comment = '';
-    private string $reserveUid = '';
-    private array  $orderAdditionalParams = [];
+    private string $specialtyName   = '';
+    private string $date            = '';
+    private string $timeBegin       = '';
+    private string $employeeUid     = '';
+    private string $clinicUid       = '';
+    private string $name            = '';
+    private string $lastName        = '';
+    private string $secondName      = '';
+    private string $phone           = '';
+    private string $email           = '';
+    private string $address         = '';
+    private string $comment         = '';
+    private string $reserveUid      = '';
+    private string $clientBirthday  = '';
+    private string $serviceDuration = '';
+    private string $serviceUid      = '';
 
     private array $requiredReserveParams  = [ 'date', 'timeBegin', 'employeeUid', 'clinicUid' ];
     private array $requiredWaitListParams = [
         'date', 'timeBegin', 'clinicUid',
         'name', 'lastName', 'secondName',  'phone'
     ];
+    private array $requiredOrderParams = [
+        'date', 'timeBegin', 'clinicUid', 'employeeUid', 'reserveUid',
+        'name', 'lastName', 'secondName',  'phone'
+    ];
 
-    public function __construct(?string $mode = null)
+    /**
+     * OrderBuilder constructor.
+     * @param string|null $mode
+     */
+    private function __construct(?string $mode = null)
     {
         $allowedModes = [static::WAIT_LIST_MODE, static::RESERVE_MODE, static::ORDER_MODE];
 
@@ -83,6 +94,14 @@ class OrderBuilder implements BuilderInterface
     public static function createReserve(): OrderBuilder
     {
         return new static(static::RESERVE_MODE);
+    }
+
+    /**
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public static function createOrder(): OrderBuilder
+    {
+        return new static(static::ORDER_MODE);
     }
 
     /**
@@ -218,12 +237,33 @@ class OrderBuilder implements BuilderInterface
     }
 
     /**
+     * @param \DateTime $date
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setClientBirthday(DateTime $date): OrderBuilder
+    {
+        $isoDate = \ANZ\BitUmc\SDK\Tools\DateTime::formatTimestampToISO($date->getTimestamp());
+        $this->clientBirthday = $isoDate;
+        return $this;
+    }
+
+    /**
      * @param int $seconds
      * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
      */
-    public function setDuration(int $seconds): OrderBuilder
+    public function setServiceDuration(int $seconds): OrderBuilder
     {
-        //$this->orderAdditionalParams['Duration'] = ...
+        $this->serviceDuration = Utils::calculateDurationFromSeconds($seconds);
+        return $this;
+    }
+
+    /**
+     * @param string $serviceUid
+     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     */
+    public function setServiceUid(string $serviceUid): OrderBuilder
+    {
+        $this->serviceUid = $serviceUid;
         return $this;
     }
 
@@ -250,7 +290,9 @@ class OrderBuilder implements BuilderInterface
             $this->address,
             $this->comment,
             $this->reserveUid,
-            $this->orderAdditionalParams,
+            $this->clientBirthday,
+            $this->serviceDuration,
+            $this->serviceUid,
         );
     }
 
@@ -274,7 +316,17 @@ class OrderBuilder implements BuilderInterface
         }
         foreach ($params as $param) {
             if (empty($this->$param)){
-                throw new Exception('Required params ' . $param . ' is empty');
+                throw new Exception('Required param "' . $param . '" is empty');
+            }
+
+            if ($param ==='date' || $param === 'timeBegin')
+            {
+                $date        = new DateTime($this->$param);
+                $dateString  = ($param ==='date') ? 'today' : 'now';
+                $compareDate = new DateTime($dateString);
+                if ($date < $compareDate) {
+                    throw new Exception('Param "' . $param . '" can not be less then ' . $compareDate->format("d.m.Y H:i:s"));
+                }
             }
         }
     }
@@ -295,6 +347,15 @@ class OrderBuilder implements BuilderInterface
         }
         if (empty($this->comment)){
             $this->comment = '';
+        }
+        if (empty($this->clientBirthday)){
+            $this->clientBirthday = '';
+        }
+        if (empty($this->serviceDuration)){
+            $this->serviceDuration = '';
+        }
+        if (empty($this->serviceUid)){
+            $this->serviceUid = '';
         }
     }
 }

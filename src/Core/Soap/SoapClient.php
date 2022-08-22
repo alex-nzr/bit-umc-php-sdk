@@ -56,13 +56,14 @@ class SoapClient extends \SoapClient
                 try
                 {
                     $xml = @(new SimpleXMLElement($response->return));
-                    $data = $this->handleXML($soapMethod, $xml);
-                    $result->setData($data);
                 }
                 catch (Exception $e)
                 {
                     throw new Exception("Error on parsing xml from response. Response data: " . $response->return);
                 }
+
+                $data = $this->handleXML($soapMethod, $xml);
+                $result->setData($data);
             }
             else
             {

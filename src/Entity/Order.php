@@ -33,28 +33,32 @@ class Order implements EntityInterface
     private string $address;
     private string $comment;
     private string $reserveUid;
-    private array  $orderAdditionalParams = [];
+    private string $clientBirthday;
+    private string $serviceDuration;
+    private string $serviceUid;
 
     public function __construct(
         string $specialtyName,  string $date,  string $timeBegin, string $employeeUid,
         string $clinicUid,      string $name,  string $lastName,  string $secondName,
         string $phone,          string $email, string $address,   string $comment,
-        string $reserveUid,     array  $orderAdditionalParams
+        string $reserveUid,     string $clientBirthday, string $serviceDuration,   string $serviceUid
     ){
-        $this->specialtyName         = $specialtyName;
-        $this->date                  = $date;
-        $this->timeBegin             = $timeBegin;
-        $this->employeeUid           = $employeeUid;
-        $this->clinicUid             = $clinicUid;
-        $this->name                  = $name;
-        $this->lastName              = $lastName;
-        $this->secondName            = $secondName;
-        $this->phone                 = $phone;
-        $this->email                 = $email;
-        $this->address               = $address;
-        $this->comment               = $comment;
-        $this->reserveUid            = $reserveUid;
-        $this->orderAdditionalParams = $orderAdditionalParams;
+        $this->specialtyName   = $specialtyName;
+        $this->date            = $date;
+        $this->timeBegin       = $timeBegin;
+        $this->employeeUid     = $employeeUid;
+        $this->clinicUid       = $clinicUid;
+        $this->name            = $name;
+        $this->lastName        = $lastName;
+        $this->secondName      = $secondName;
+        $this->phone           = $phone;
+        $this->email           = $email;
+        $this->address         = $address;
+        $this->comment         = $comment;
+        $this->reserveUid      = $reserveUid;
+        $this->clientBirthday  = $clientBirthday;
+        $this->serviceDuration = $serviceDuration;
+        $this->serviceUid      = $serviceUid;
     }
 
     /**
@@ -162,10 +166,26 @@ class Order implements EntityInterface
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getOrderAdditionalParams(): array
+    public function getClientBirthday(): string
     {
-        return $this->orderAdditionalParams;
+        return $this->clientBirthday;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServiceDuration(): string
+    {
+        return $this->serviceDuration;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServiceUid(): string
+    {
+        return $this->serviceUid;
     }
 }

@@ -60,28 +60,32 @@ class WsWriter extends Common
         ];
         return $this->getResponse(SoapMethod::CREATE_WAIT_LIST_ACTION_1C, $params);
     }
-}
 
-/*
-elseif($this->useOrder)
-{
-    $paramsToSend = [
-        'EmployeeID'        => $params['refUid'],
-        'PatientSurname'    => $params['surname'],
-        'PatientName'       => $params['name'],
-        'PatientFatherName' => $params['middleName'],
-        'Date'              => $params['orderDate'],
-        'TimeBegin'         => $params['timeBegin'],
-        'Comment'           => $params['comment'] ?? '',
-        'Phone'             => Utils::formatPhone($params['phone']),
-        'Email'             => $params['email'] ?? '',
-        'Address'           => $params['address'] ?? '',
-        'Clinic'            => $params['clinicUid'],
-        'GUID'              => $xml_id,
-        'Params'            => [
-            'Birthday' => '',
-            'Duration' => '',
-            //'Service' => 'serviceGuid',
-        ]
-    ];
-}*/
+    /**
+     * @param \ANZ\BitUmc\SDK\Entity\Order $order
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function sendOrder(Order $order): Result
+    {
+        $params = [
+            'EmployeeID'        => $order->getEmployeeUid(),
+            'PatientSurname'    => $order->getLastName(),
+            'PatientName'       => $order->getName(),
+            'PatientFatherName' => $order->getSecondName(),
+            'Date'              => $order->getDate(),
+            'TimeBegin'         => $order->getTimeBegin(),
+            'Phone'             => Utils::formatPhone($order->getPhone()),
+            'Email'             => $order->getEmail(),
+            'Address'           => $order->getAddress(),
+            'Clinic'            => $order->getClinicUid(),
+            'Comment'           => $order->getComment(),
+            'GUID'              => $order->getReserveUid(),
+            'Params'            => [
+                'Birthday' => $order->getClientBirthday(),
+                'Duration' => $order->getServiceDuration(),
+                'Service'  => $order->getServiceUid(), // unavailable in 1c yet
+            ]
+        ];
+        return $this->getResponse(SoapMethod::CREATE_ORDER_ACTION_1C, $params);
+    }
+}
