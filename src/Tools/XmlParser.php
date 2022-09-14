@@ -107,10 +107,10 @@ class XmlParser
                 $employee['fullName']     = $item[$lastNameKey] ." ". $item[$nameKey] ." ". $item[$middleNameKey];
                 $employee['clinicUid']    = $clinicUid;
                 $employee['photo']        = $item[$photoKey];
-                $employee['description']  = $item[$descriptionKey];
+                $employee['description']  = !empty($item[$descriptionKey]) ? $item[$descriptionKey] : '';
                 $employee['rating']       = $item[$ratingKey];
                 $employee['specialtyName']= $item[$specialtyKey];
-                $employee['specialtyUid'] = $this->getSpecialtyUid($item[$specialtyKey]);
+                $employee['specialtyUid'] = !empty($item[$specialtyKey]) ? $this->getSpecialtyUid($item[$specialtyKey]) : '';
                 $employee['services']     = [];
 
                 if (is_array($item[$servicesKey][$oneServiceKey]))
@@ -166,10 +166,10 @@ class XmlParser
                 $product['uid']         = $uid;
                 $product['name']        = $item[$titleKey];
                 $product['typeOfItem']  = $item[$typeKey];
-                $product['artNumber']   = $item[$artNumberKey];
+                $product['artNumber']   = !empty($item[$artNumberKey]) ? $item[$artNumberKey] : '';
                 $product['price']       = str_replace("[^0-9]", '', $item[$priceKey]);
                 $product['duration']    = DateTime::formatDurationFromIsoToSeconds($item[$durationKey]);
-                $product['measureUnit'] = $item[$measureUnitKey];
+                $product['measureUnit'] = !empty($item[$measureUnitKey]) ? $item[$measureUnitKey] : '';
                 $product['parent']      = $item[$parent];
                 $nomenclature[$uid]     = $product;
             }
@@ -180,11 +180,17 @@ class XmlParser
     /**
      * @param SimpleXMLElement $xml
      * @return array
+     * @throws \Exception
      */
     public function prepareScheduleData(SimpleXMLElement $xml): array
     {
-        $xmlArr = $this->xmlToArray($xml);
-        $scheduleKey = 'ГрафикДляСайта';
+        $xmlArr           = $this->xmlToArray($xml);
+        $scheduleKey      = 'ГрафикДляСайта';
+        $scheduleErrorKey = 'ОшибкаПараметров';
+
+        if (array_key_exists($scheduleErrorKey, $xmlArr)){
+            throw new Exception((string)$xmlArr[$scheduleErrorKey]);
+        }
 
         $schedule = [];
         if (is_array($xmlArr[$scheduleKey])){

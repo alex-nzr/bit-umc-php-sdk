@@ -83,9 +83,15 @@ class WsWriter extends Common
             'Params'            => [
                 'Birthday' => $order->getClientBirthday(),
                 'Duration' => $order->getServiceDuration(),
-                'Service'  => $order->getServiceUid(), // unavailable in 1c yet
             ]
         ];
+
+        if (!empty($order->getServices()))
+        {
+            $params['Params']['Services']     = $order->getServices();
+            $params['Params']['DurationType'] = $order->getDurationType();
+        }
+
         return $this->getResponse(SoapMethod::CREATE_ORDER_ACTION_1C, $params);
     }
 }

@@ -53,17 +53,29 @@ class SoapClient extends \SoapClient
 
             if (is_object($response) && property_exists($response, 'return'))
             {
-                try
+                //create method handleStringResponse FUCKING_KOSTYL
+                if ($response->return === 'Ok')
                 {
-                    $xml = @(new SimpleXMLElement($response->return));
+                    $result->setData(['success' => true]);
                 }
-                catch (Exception $e)
+                elseif($response->return === 'Error')
                 {
-                    throw new Exception("Error on parsing xml from response. Response data: " . $response->return);
+                    throw new Exception('1c returned an unknown error to the request - ' . $soapMethod);
                 }
+                else
+                {
+                    try
+                    {
+                        $xml = @(new SimpleXMLElement($response->return));
+                    }
+                    catch (Exception $e)
+                    {
+                        throw new Exception("Error on parsing xml from response. Response data: " . $response->return);
+                    }
 
-                $data = $this->handleXML($soapMethod, $xml);
-                $result->setData($data);
+                    $data = $this->handleXML($soapMethod, $xml);
+                    $result->setData($data);
+                }
             }
             else
             {

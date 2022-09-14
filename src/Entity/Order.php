@@ -35,13 +35,13 @@ class Order implements EntityInterface
     private string $reserveUid;
     private string $clientBirthday;
     private string $serviceDuration;
-    private string $serviceUid;
+    private array  $services;
 
     public function __construct(
         string $specialtyName,  string $date,  string $timeBegin, string $employeeUid,
         string $clinicUid,      string $name,  string $lastName,  string $secondName,
         string $phone,          string $email, string $address,   string $comment,
-        string $reserveUid,     string $clientBirthday, string $serviceDuration,   string $serviceUid
+        string $reserveUid,     string $clientBirthday, string $serviceDuration,  array $services
     ){
         $this->specialtyName   = $specialtyName;
         $this->date            = $date;
@@ -58,7 +58,7 @@ class Order implements EntityInterface
         $this->reserveUid      = $reserveUid;
         $this->clientBirthday  = $clientBirthday;
         $this->serviceDuration = $serviceDuration;
-        $this->serviceUid      = $serviceUid;
+        $this->services        = $services;
     }
 
     /**
@@ -184,8 +184,16 @@ class Order implements EntityInterface
     /**
      * @return string
      */
-    public function getServiceUid(): string
+    public function getServices(): string
     {
-        return $this->serviceUid;
+        return implode(';', $this->services);
+    }
+
+    /**
+     * @return string
+     */
+    public function getDurationType(): string
+    {
+        return 'ServiceDuration';
     }
 }

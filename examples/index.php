@@ -12,7 +12,7 @@ try {
                 ->setPassword('123456')
                 ->setHttps(false)
                 ->setAddress('localhost:3500')
-                ->setBaseName('umc')
+                ->setBaseName('tempTestUmc')
                 ->build();
 
     $factory = new ServiceFactory($client);
@@ -21,56 +21,60 @@ try {
 
     //$res = $reader->getClinics();
     //$res = $reader->getEmployees();
-    //$res = $reader->getNomenclature('f679444a-22b7-11df-8618-002618dcef2c');
-    /*$res = $reader->getSchedule(14, 'f679444a-22b7-11df-8618-002618dcef2c', [
-        '19cb6fa5-1578-11ed-9bee-5c3a455eb0d0', '99868528-0928-11dc-93d1-0004614ae652',
-        '2eb1f97b-6a3c-11e9-936d-1856809fe650'
+    //$res = $reader->getNomenclature('a78cbf94-24bd-11eb-baa7-1c1b0d51378c');
+    /*$res = $reader->getSchedule(14, 'a78cbf94-24bd-11eb-baa7-1c1b0d51378c', [
+        '0aeb21f1-cff1-4ff9-b3c1-721cf67f3968',
+        'f3151797-457d-487c-bb5f-e6e27ce9e180'
     ]);*/
     //$res = $reader->getOrderStatus('ddc9234f-1fee-11ed-9bef-5e3a455eb0cf');
 
-    //В качестве даты передаётся объект \DateTime, созданный любым удобным способом
-    $date      = new \DateTime('2022-08-21T00:00:00');
-    $timeBegin = \DateTime::createFromFormat("d.m.Y H:i:s", "21.08.2022 09:00:00");
-
-    $reserve   = OrderBuilder::createReserve()
-        ->setClinicUid('f679444a-22b7-11df-8618-002618dcef2c')
-        ->setSpecialtyName('Терапия')
-        ->setEmployeeUid('19cb6fa5-1578-11ed-9bee-5c3a455eb0d0')
-        ->setDate($date)
-        ->setTimeBegin($timeBegin)
-        ->build();
-    $res = $writer->sendReserve($reserve);
+    //В качестве даты и времени записи передаётся объект \DateTime, созданный любым удобным способом
+    $dateTimeBegin = \DateTime::createFromFormat("d.m.Y H:i:s", "14.09.2022 08:00:00");
 
     /*$waitList   = OrderBuilder::createWaitList()
-        ->setSpecialtyName('Терапия')
+        ->setSpecialtyName('Стоматология ПУ')
         ->setName('Иван')
         ->setLastName('Иванов')
         ->setSecondName('Иванович')
-        ->setDate($date)
-        ->setTimeBegin($timeBegin)
-        ->setPhone("+79000803125")
+        ->setDateTimeBegin($dateTimeBegin)
+        ->setPhone("+7 (915) 5415935")
         ->setEmail('example@gmail.com')
         ->setAddress('г. Москва, проспект Ленина 45')
-        ->setClinicUid('f679444a-22b7-11df-8618-002618dcef2c')
+        ->setClinicUid('a78cbf94-24bd-11eb-baa7-1c1b0d51378c')
         ->setComment('Comment text')
         ->build();
 
-    $res = $writer->sendWaitList($waitList);*/
+    $waitListRes = $writer->sendWaitList($waitList);*/
+
+    /*$reserve   = OrderBuilder::createReserve()
+        ->setClinicUid('a78cbf94-24bd-11eb-baa7-1c1b0d51378c')
+        ->setSpecialtyName('Стоматология ПУ')
+        ->setEmployeeUid('0aeb21f1-cff1-4ff9-b3c1-721cf67f3968')
+        ->setDateTimeBegin($dateTimeBegin)
+        ->build();
+    $res = $writer->sendReserve($reserve);*/
 
     $order   = OrderBuilder::createOrder()
-        ->setEmployeeUid('19cb6fa5-1578-11ed-9bee-5c3a455eb0d0')
-        ->setName('Петр')
-        ->setLastName('Петров')
-        ->setSecondName('Петрович')
-        ->setDate($date)
-        ->setTimeBegin($timeBegin)
+        ->setEmployeeUid('0aeb21f1-cff1-4ff9-b3c1-721cf67f3968')
+        ->setName('Антон')
+        ->setLastName('Пехота')
+        ->setSecondName('Павлович')
+        ->setDateTimeBegin($dateTimeBegin)
         ->setPhone("+79000803126")
-        ->setEmail('petr@gmail.com')
+        ->setEmail('ppp@gmail.com')
         ->setAddress('г. Москва, проспект Ленина 46')
-        ->setClinicUid('f679444a-22b7-11df-8618-002618dcef2c')
-        ->setReserveUid($res->getData()['uid'])
+        ->setClinicUid('a78cbf94-24bd-11eb-baa7-1c1b0d51378c')
+        ->setReserveUid('049f00c5-3391-11ed-9bf2-5e3a455eb0cf')
         ->setComment('Comment text')
-        ->setServiceDuration(3600)
+
+        ->setAppointmentDuration(2700)
+
+        ->setServices([
+            '964759cf-de9c-11e9-9383-50af73235947',
+            '964759e2-de9c-11e9-9383-50af73235947',
+            'bd439810-de9c-11e9-9383-50af73235947'
+        ])
+
         ->setClientBirthday(\DateTime::createFromFormat("d.m.Y", "05.08.1962"))
         ->build();
 

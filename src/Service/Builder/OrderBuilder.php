@@ -45,7 +45,7 @@ class OrderBuilder implements BuilderInterface
     private string $reserveUid      = '';
     private string $clientBirthday  = '';
     private string $serviceDuration = '';
-    private string $serviceUid      = '';
+    private array  $services        = [];
 
     private array $requiredReserveParams  = [ 'date', 'timeBegin', 'employeeUid', 'clinicUid' ];
     private array $requiredWaitListParams = [
@@ -115,23 +115,13 @@ class OrderBuilder implements BuilderInterface
     }
 
     /**
-     * @param \DateTime $date
+     * @param \DateTime $dateTimeBegin
      * @return $this
      */
-    public function setDate(DateTime $date): OrderBuilder
+    public function setDateTimeBegin(DateTime $dateTimeBegin): OrderBuilder
     {
-        $isoDate = \ANZ\BitUmc\SDK\Tools\DateTime::formatTimestampToISO($date->getTimestamp());
-        $this->date = $isoDate;
-        return $this;
-    }
-
-    /**
-     * @param \DateTime $timeBegin
-     * @return $this
-     */
-    public function setTimeBegin(DateTime $timeBegin): OrderBuilder
-    {
-        $isoDate = \ANZ\BitUmc\SDK\Tools\DateTime::formatTimestampToISO($timeBegin->getTimestamp());
+        $isoDate = \ANZ\BitUmc\SDK\Tools\DateTime::formatTimestampToISO($dateTimeBegin->getTimestamp());
+        $this->date      = $isoDate;
         $this->timeBegin = $isoDate;
         return $this;
     }
@@ -251,19 +241,19 @@ class OrderBuilder implements BuilderInterface
      * @param int $seconds
      * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
      */
-    public function setServiceDuration(int $seconds): OrderBuilder
+    public function setAppointmentDuration(int $seconds): OrderBuilder
     {
         $this->serviceDuration = Utils::calculateDurationFromSeconds($seconds);
         return $this;
     }
 
     /**
-     * @param string $serviceUid
+     * @param array $services
      * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
      */
-    public function setServiceUid(string $serviceUid): OrderBuilder
+    public function setServices(array $services): OrderBuilder
     {
-        $this->serviceUid = $serviceUid;
+        $this->services = $services;
         return $this;
     }
 
@@ -292,7 +282,7 @@ class OrderBuilder implements BuilderInterface
             $this->reserveUid,
             $this->clientBirthday,
             $this->serviceDuration,
-            $this->serviceUid,
+            $this->services,
         );
     }
 
