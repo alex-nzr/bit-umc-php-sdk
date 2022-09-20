@@ -15,7 +15,7 @@
 Добавьте пакет в зависимости `composer.json`:
 ```
 {
-    "require":{"alex-nzr/bit-umc-php-sdk":"dev-master"}
+    "require":{"alex-nzr/bit-umc-sdk":"dev-master"}
 }
 ```
 
@@ -25,7 +25,7 @@ $ php composer.phar install
 ```
 или
 ```
-composer require alex-nzr/bit-umc-php-sdk:dev-master
+composer require alex-nzr/bit-umc-sdk:dev-master
 ```
 
 ### Скачать исходники
