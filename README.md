@@ -30,8 +30,8 @@ composer require alex-nzr/bit-umc-php-sdk:dev-master
 
 ### Скачать исходники
 
-[Актуальная версия](https://github.com/alex-nzr/bit-umc-php-sdk/archive/refs/heads/master.zip), unzip and copy to your project folder.
-
+[Актуальная версия](https://github.com/alex-nzr/bit-umc-php-sdk/archive/refs/heads/master.zip),
+распаковать и скопировать в папку с проектом.
 
 ## Использование
 
@@ -606,3 +606,10 @@ And then can start working with 1c
         )
         */
 ```
+
+
+##Примеры работы
+На данный момент можно только ознакомиться с примерами вызова методов
+[тут](https://github.com/alex-nzr/bit-umc-php-sdk/tree/master/examples).
+
+В будущем, возможно, будут полноценные примеры, включающие в себя и фронтенд.
