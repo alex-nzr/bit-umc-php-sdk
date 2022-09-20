@@ -53,7 +53,7 @@ class SoapClient extends \SoapClient
 
             if (is_object($response) && property_exists($response, 'return'))
             {
-                //create method handleStringResponse FUCKING_KOSTYL
+                //Damned KOSTYL, because sometimes api of Bit-umc is striking...
                 if ($response->return === 'Ok')
                 {
                     $result->setData(['success' => true]);

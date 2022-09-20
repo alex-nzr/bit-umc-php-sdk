@@ -26,6 +26,8 @@ class XmlParser
 {
     use Singleton;
 
+    const EMPTY_SPECIALTY_NAME = 'Без основной специализации';
+
     /**
      * @param SimpleXMLElement $xml
      * @return array
@@ -100,6 +102,9 @@ class XmlParser
                 $clinicUid = ($item[$organizationKey] == "00000000-0000-0000-0000-000000000000") ? "" : $item[$organizationKey];
                 $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
 
+                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : static::EMPTY_SPECIALTY_NAME;
+                $specialtyUid  = $this->getSpecialtyUid($specialtyName);
+
                 $employee['uid']          = $uid;
                 $employee['name']         = $item[$nameKey];
                 $employee['surname']      = $item[$lastNameKey];
@@ -109,8 +114,8 @@ class XmlParser
                 $employee['photo']        = $item[$photoKey];
                 $employee['description']  = !empty($item[$descriptionKey]) ? $item[$descriptionKey] : '';
                 $employee['rating']       = $item[$ratingKey];
-                $employee['specialtyName']= $item[$specialtyKey];
-                $employee['specialtyUid'] = !empty($item[$specialtyKey]) ? $this->getSpecialtyUid($item[$specialtyKey]) : '';
+                $employee['specialtyName']= $specialtyName;
+                $employee['specialtyUid'] = $specialtyUid;
                 $employee['services']     = [];
 
                 if (is_array($item[$servicesKey][$oneServiceKey]))
@@ -231,73 +236,71 @@ class XmlParser
                     $formattedSchedule[$clinicUid] = [];
                 }
 
-                if (!empty($item[$specialtyKey])){
-                    $specialtyName = $item[$specialtyKey];
-                    $specialtyUid  = $this->getSpecialtyUid($item[$specialtyKey]);
+                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : static::EMPTY_SPECIALTY_NAME;
+                $specialtyUid  = $this->getSpecialtyUid($specialtyName);
 
-                    if (!is_array($formattedSchedule[$clinicUid][$specialtyUid]))
+                if (!is_array($formattedSchedule[$clinicUid][$specialtyUid]))
+                {
+                    $formattedSchedule[$clinicUid][$specialtyUid] = [];
+                }
+
+                if (!empty($item[$employeeUidKey]))
+                {
+                    $employeeUid     = $item[$employeeUidKey];
+                    $employeeName    = $item[$employeeFullNameKey];
+
+                    $durationSeconds = 1800;//default duration = 30min
+                    $durationFrom1C  = '';
+                    if (!empty($item[$scheduleDurationKey]))
                     {
-                        $formattedSchedule[$clinicUid][$specialtyUid] = [];
+                        $durationFrom1C  = $item[$scheduleDurationKey];
+                        $durationSeconds = intval(date("H", strtotime($durationFrom1C))) * 3600
+                            + intval(date("i", strtotime($durationFrom1C))) * 60;
                     }
 
-                    if (!empty($item[$employeeUidKey]))
+                    if (empty($formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]))
                     {
-                        $employeeUid     = $item[$employeeUidKey];
-                        $employeeName    = $item[$employeeFullNameKey];
-
-                        $durationSeconds = 1800;//default duration = 30min
-                        $durationFrom1C  = '';
-                        if (!empty($item[$scheduleDurationKey]))
-                        {
-                            $durationFrom1C  = $item[$scheduleDurationKey];
-                            $durationSeconds = intval(date("H", strtotime($durationFrom1C))) * 3600
-                                + intval(date("i", strtotime($durationFrom1C))) * 60;
-                        }
-
-                        if (empty($formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]))
-                        {
-                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid] = [
-                                'specialtyName'     => $specialtyName,
-                                'employeeName'      => $employeeName,
-                                'durationFrom1C'    => $durationFrom1C,
-                                'durationInSeconds' => $durationSeconds,
-                                'timetable'         => [
-                                    'freeFormatted' => [],
-                                    'busy'          => [],
-                                    'free'          => [],
-                                ]
-                            ];
-                        }
-
-                        $timetable = [];
-
-                        $freeTime = (is_array($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) && count($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) > 0)
-                            ? $item[$schedulePeriodsKey][$scheduleFreeTimeKey][$scheduleOnePeriodKey] : [];
-                        $busyTime = (is_array($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) && count($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) > 0)
-                            ? $item[$schedulePeriodsKey][$scheduleBusyTimeKey][$scheduleOnePeriodKey] : [];
-
-                        if (Utils::is_assoc($freeTime)) {
-                            $freeTime = [$freeTime];
-                        }
-                        if (Utils::is_assoc($busyTime)) {
-                            $busyTime = [$busyTime];
-                        }
-
-                        $timetable["free"] = array_merge(
-                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["free"],
-                            $this->formatTimetable($freeTime, 0, true)
-                        );
-                        $timetable["busy"] = array_merge(
-                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["busy"],
-                            $this->formatTimetable($busyTime, 0, true)
-                        );
-                        $timetable["freeFormatted"] = array_merge(
-                            $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["freeFormatted"],
-                            $this->formatTimetable($freeTime, $durationSeconds)
-                        );
-
-                        $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable'] = $timetable;
+                        $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid] = [
+                            'specialtyName'     => $specialtyName,
+                            'employeeName'      => $employeeName,
+                            'durationFrom1C'    => $durationFrom1C,
+                            'durationInSeconds' => $durationSeconds,
+                            'timetable'         => [
+                                'freeFormatted' => [],
+                                'busy'          => [],
+                                'free'          => [],
+                            ]
+                        ];
                     }
+
+                    $timetable = [];
+
+                    $freeTime = (is_array($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) && count($item[$schedulePeriodsKey][$scheduleFreeTimeKey]) > 0)
+                        ? $item[$schedulePeriodsKey][$scheduleFreeTimeKey][$scheduleOnePeriodKey] : [];
+                    $busyTime = (is_array($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) && count($item[$schedulePeriodsKey][$scheduleBusyTimeKey]) > 0)
+                        ? $item[$schedulePeriodsKey][$scheduleBusyTimeKey][$scheduleOnePeriodKey] : [];
+
+                    if (Utils::is_assoc($freeTime)) {
+                        $freeTime = [$freeTime];
+                    }
+                    if (Utils::is_assoc($busyTime)) {
+                        $busyTime = [$busyTime];
+                    }
+
+                    $timetable["free"] = array_merge(
+                        $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["free"],
+                        $this->formatTimetable($freeTime, 0, true)
+                    );
+                    $timetable["busy"] = array_merge(
+                        $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["busy"],
+                        $this->formatTimetable($busyTime, 0, true)
+                    );
+                    $timetable["freeFormatted"] = array_merge(
+                        $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable']["freeFormatted"],
+                        $this->formatTimetable($freeTime, $durationSeconds)
+                    );
+
+                    $formattedSchedule[$clinicUid][$specialtyUid][$employeeUid]['timetable'] = $timetable;
                 }
             }
         }
@@ -334,19 +337,21 @@ class XmlParser
             $formattedArray = [];
             foreach ($array as $item)
             {
+                $formattedDateKey = date("d-m-Y", strtotime($item[$scheduleDateKey]));
+
                 $timestampTimeBegin = strtotime($item[$scheduleStartKey]);
                 $timestampTimeEnd = strtotime($item[$scheduleEndKey]);
 
                 if ($useDefaultInterval)
                 {
                     $newTimeTableItem = $this->formatTimeTableItem($item, (int)$timestampTimeBegin, (int)$timestampTimeEnd);
-                    if (!is_array($formattedArray[$item[$scheduleDateKey]]))
+                    if (!is_array($formattedArray[$formattedDateKey]))
                     {
-                        $formattedArray[$item[$scheduleDateKey]] = [$newTimeTableItem];
+                        $formattedArray[$formattedDateKey] = [$newTimeTableItem];
                     }
                     else
                     {
-                        $formattedArray[$item[$scheduleDateKey]][] = $newTimeTableItem;
+                        $formattedArray[$formattedDateKey][] = $newTimeTableItem;
                     }
                 }
                 else
@@ -360,13 +365,13 @@ class XmlParser
                         $end = $timestampTimeBegin + ($duration * ($i+1));
 
                         $newTimeTableItem = $this->formatTimeTableItem($item, (int)$start, (int)$end);
-                        if (!is_array($formattedArray[$item[$scheduleDateKey]]))
+                        if (!is_array($formattedArray[$formattedDateKey]))
                         {
-                            $formattedArray[$item[$scheduleDateKey]] = [$newTimeTableItem];
+                            $formattedArray[$formattedDateKey] = [$newTimeTableItem];
                         }
                         else
                         {
-                            $formattedArray[$item[$scheduleDateKey]][] = $newTimeTableItem;
+                            $formattedArray[$formattedDateKey][] = $newTimeTableItem;
                         }
                     }
                 }
@@ -391,7 +396,7 @@ class XmlParser
         $scheduleTimeTypeKey = "ВидВремени";
 
         return [
-            "typeOfTimeUid" => $item[$scheduleTimeTypeKey],
+            "typeOfTimeUid" => !empty($item[$scheduleTimeTypeKey]) ? $item[$scheduleTimeTypeKey] : '',
             "date" => $item[$scheduleDateKey],
             "timeBegin" => date("Y-m-d", $start) ."T". date("H:i:s", $start),
             "timeEnd" => date("Y-m-d", $end) ."T". date("H:i:s", $end),
@@ -465,7 +470,6 @@ class XmlParser
             $statusTitle = ((int)$statusCode === 9) ? $reservedStatusText : $xmlArr[$commonResDescKey];
 
             return [
-                'success'   => true,
                 'statusId'  => $xmlArr[$commonResKey],
                 'status'    => (is_array($statusTitle)) ? implode("; ", $statusTitle) : $statusTitle,
             ];
@@ -481,6 +485,6 @@ class XmlParser
      */
     protected function getSpecialtyUid(?string $specialtyName): string
     {
-        return !empty($specialtyName) ? base64_encode($specialtyName) : '';
+        return !empty($specialtyName) ? preg_replace("/[^a-z0-9\s]/", '', strtolower(base64_encode($specialtyName))) : '';
     }
 }

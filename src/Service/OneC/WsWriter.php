@@ -79,7 +79,7 @@ class WsWriter extends Common
             'Address'           => $order->getAddress(),
             'Clinic'            => $order->getClinicUid(),
             'Comment'           => $order->getComment(),
-            'GUID'              => $order->getReserveUid(),
+            'GUID'              => $order->getOrderUid(),
             'Params'            => [
                 'Birthday' => $order->getClientBirthday(),
                 'Duration' => $order->getServiceDuration(),
@@ -93,5 +93,13 @@ class WsWriter extends Common
         }
 
         return $this->getResponse(SoapMethod::CREATE_ORDER_ACTION_1C, $params);
+    }
+
+    public function deleteOrder(string $orderUid): Result
+    {
+        $params = [
+            'GUID' => $orderUid,
+        ];
+        return $this->getResponse(SoapMethod::DELETE_ORDER_ACTION_1C, $params);
     }
 }

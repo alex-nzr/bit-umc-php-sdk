@@ -32,7 +32,7 @@ class Order implements EntityInterface
     private string $email;
     private string $address;
     private string $comment;
-    private string $reserveUid;
+    private string $orderUid;
     private string $clientBirthday;
     private string $serviceDuration;
     private array  $services;
@@ -41,7 +41,7 @@ class Order implements EntityInterface
         string $specialtyName,  string $date,  string $timeBegin, string $employeeUid,
         string $clinicUid,      string $name,  string $lastName,  string $secondName,
         string $phone,          string $email, string $address,   string $comment,
-        string $reserveUid,     string $clientBirthday, string $serviceDuration,  array $services
+        string $orderUid,     string $clientBirthday, string $serviceDuration,  array $services
     ){
         $this->specialtyName   = $specialtyName;
         $this->date            = $date;
@@ -55,7 +55,7 @@ class Order implements EntityInterface
         $this->email           = $email;
         $this->address         = $address;
         $this->comment         = $comment;
-        $this->reserveUid      = $reserveUid;
+        $this->orderUid      = $orderUid;
         $this->clientBirthday  = $clientBirthday;
         $this->serviceDuration = $serviceDuration;
         $this->services        = $services;
@@ -160,9 +160,9 @@ class Order implements EntityInterface
     /**
      * @return string
      */
-    public function getReserveUid(): string
+    public function getOrderUid(): string
     {
-        return $this->reserveUid;
+        return $this->orderUid;
     }
 
     /**

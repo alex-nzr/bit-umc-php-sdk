@@ -42,7 +42,7 @@ class OrderBuilder implements BuilderInterface
     private string $email           = '';
     private string $address         = '';
     private string $comment         = '';
-    private string $reserveUid      = '';
+    private string $orderUid      = '';
     private string $clientBirthday  = '';
     private string $serviceDuration = '';
     private array  $services        = [];
@@ -53,7 +53,7 @@ class OrderBuilder implements BuilderInterface
         'name', 'lastName', 'secondName',  'phone'
     ];
     private array $requiredOrderParams = [
-        'date', 'timeBegin', 'clinicUid', 'employeeUid', 'reserveUid',
+        'date', 'timeBegin', 'clinicUid', 'employeeUid',
         'name', 'lastName', 'secondName',  'phone'
     ];
 
@@ -217,12 +217,12 @@ class OrderBuilder implements BuilderInterface
     }
 
     /**
-     * @param string $reserveUid
+     * @param string $orderUid
      * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
      */
-    public function setReserveUid(string $reserveUid): OrderBuilder
+    public function setOrderUid(string $orderUid): OrderBuilder
     {
-        $this->reserveUid = $reserveUid;
+        $this->orderUid = $orderUid;
         return $this;
     }
 
@@ -279,7 +279,7 @@ class OrderBuilder implements BuilderInterface
             $this->email,
             $this->address,
             $this->comment,
-            $this->reserveUid,
+            $this->orderUid,
             $this->clientBirthday,
             $this->serviceDuration,
             $this->services,
@@ -346,6 +346,9 @@ class OrderBuilder implements BuilderInterface
         }
         if (empty($this->serviceUid)){
             $this->serviceUid = '';
+        }
+        if (empty($this->orderUid)){
+            $this->orderUid = '';
         }
     }
 }
