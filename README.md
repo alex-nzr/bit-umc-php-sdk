@@ -12,14 +12,14 @@
 ## Установка
 
 ### Установка через composer
-Добавьте пакет в зависимости `composer.json`:
+Добавить пакет в зависимости `composer.json`:
 ```
 {
     "require":{"alex-nzr/bit-umc-sdk":"dev-master"}
 }
 ```
 
-Запустите установку [composer](https://getcomposer.org/doc/00-intro.md#installation):
+Запустить установку [composer](https://getcomposer.org/doc/00-intro.md#installation):
 ```
 $ php composer.phar install
 ```
@@ -73,7 +73,7 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
     $writer  = $factory->getWriter();
 ```
 
-And then can start working with 1c
+После этого можно начинать "общение" с 1С.
 
 ### Список клиник
 ```
