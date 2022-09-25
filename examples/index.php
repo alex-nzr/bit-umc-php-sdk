@@ -11,7 +11,7 @@ try {
                 ->setLogin('siteIntegration')
                 ->setPassword('123456')
                 ->setHttps(false)
-                ->setAddress('localhost:3500')
+                ->setAddress('1c.nivlako.keenetic.pro')
                 ->setBaseName('umc')
                 ->build();
 
@@ -25,7 +25,7 @@ try {
     $srvUid1   = '22d1b486-b34b-11de-8171-001583078ee5';//'964759cf-de9c-11e9-9383-50af73235947';
     $srvUid2   = '22d1b484-b34b-11de-8171-001583078ee5';//'bd439810-de9c-11e9-9383-50af73235947';
 
-    //$res = $reader->getClinics();
+    $res = $reader->getClinics();
     //$res = $reader->getEmployees();
     //$res = $reader->getNomenclature($clinicUid);
     //$res = $reader->getSchedule(1, $clinicUid, [ $empUid1, $empUid2 ]);
@@ -78,7 +78,7 @@ try {
 
     $res = $writer->sendOrder($order);*/
 
-    $res = $writer->deleteOrder('54cd6a8e-3912-11ed-9bf2-5e3a455eb0cf');
+    //$res = $writer->deleteOrder('54cd6a8e-3912-11ed-9bf2-5e3a455eb0cf');
 
     if ($res->isSuccess())
     {

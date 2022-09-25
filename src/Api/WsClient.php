@@ -62,6 +62,15 @@ class WsClient implements ApiClient
     }
 
     /**
+     * @return string
+     */
+    public function getLocation(): string
+    {
+        $protocol = $this->https ? 'https' : 'http';
+        return sprintf('%s://%s/%s/ws/ws1.1cws', $protocol, $this->address, $this->baseName);
+    }
+
+    /**
      * @return array
      * @throws \Exception
      */
@@ -78,11 +87,13 @@ class WsClient implements ApiClient
                     ]
                 ]
             ),
-            'soap_version' => SOAP_1_2,
-            'exceptions' => true,
-            'trace' => 1,
+            'soap_version'       => SOAP_1_2,
+            'location'           => $this->getLocation(),
+            'cache_wsdl'         => WSDL_CACHE_NONE,
+            'exceptions'         => true,
+            'trace'              => 1,
             'connection_timeout' => 5000,
-            'keep_alive' => false,
+            'keep_alive'         => false,
         ];
     }
 
