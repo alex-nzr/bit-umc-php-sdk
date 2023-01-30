@@ -41,8 +41,9 @@ class SoapClient extends \SoapClient
     public function send(string $soapMethod, array $params = []): Result
     {
         $result = new Result();
-        try {
-            if (is_array($params['Params']))
+        try
+        {
+            if (array_key_exists('Params', $params) && is_array($params['Params']))
             {
                 $params['Params'] = $this->prepareSoapParams($params['Params']);
             }
