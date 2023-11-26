@@ -1,6 +1,8 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php');
 
+use ANZ\BitUmc\SDK\Core\Enumeration\ClientScope;
+use ANZ\BitUmc\SDK\Core\Enumeration\Protocol;
 use ANZ\BitUmc\SDK\Service\Builder\ClientBuilder;
 use ANZ\BitUmc\SDK\Service\Builder\OrderBuilder;
 use ANZ\BitUmc\SDK\Service\Factory\ServiceFactory;
@@ -10,12 +12,13 @@ try {
     $client = ClientBuilder::init()
                 ->setLogin('siteIntegration')
                 ->setPassword('123456')
-                ->setHttps(false)
-                ->setAddress('1c.nivlako.keenetic.pro')
+                ->setPublicationProtocol(Protocol::HTTP)
+                ->setPublicationAddress('1c.nivlako.keenetic.pro')
                 ->setBaseName('umc')
+                ->setScope(ClientScope::WEB_SERVICE)
                 ->build();
 
-    $factory = new ServiceFactory($client);
+    $factory = ServiceFactory::initByClient($client);
     $reader  = $factory->getReader();
     $writer  = $factory->getWriter();
 

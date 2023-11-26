@@ -5,30 +5,26 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - ApiClient.php
- * 04.08.2022 02:06
+ * bit-umc-php-sdk - IBuilder.php
+ * 06.08.2022 21:26
  * ==================================================
  */
 
 namespace ANZ\BitUmc\SDK\Core\Contract;
 
-use ANZ\BitUmc\SDK\Core\Operation\Result;
-
 /**
- * Interface ApiClientInterface
+ * Interface IBuilder
  * @package ANZ\BitUmc\SDK\Core\Contract
  */
-interface ApiClient
+interface IBuilder
 {
     /**
-     * @return bool
+     * @return \ANZ\BitUmc\SDK\Core\Contract\IBuilder
      */
-    public function isHsScope(): bool;
+    public static function init(): static;
 
     /**
-     * @param string $method
-     * @param array $params
-     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     * @return mixed
      */
-    public function send(string $method, array $params): Result;
+    public function build(): mixed;
 }

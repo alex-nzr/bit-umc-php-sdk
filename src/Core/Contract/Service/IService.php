@@ -3,22 +3,21 @@
  * ==================================================
  * Developer: Alexey Nazarov
  * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * Copyright (c) 2019 - 2023
  * ==================================================
- * bit-umc-php-sdk - ServiceInterface.php
- * 05.08.2022 23:46
+ * bit-umc-php-sdk - IService.php
+ * 25.11.2023 00:41
  * ==================================================
  */
-
-namespace ANZ\BitUmc\SDK\Core\Contract;
+namespace ANZ\BitUmc\SDK\Core\Contract\Service;
 
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
- * Interface ServiceInterface
- * @package ANZ\BitUmc\SDK\Core\Contract
+ * @interface IService
+ * @package ANZ\BitUmc\SDK\Core\Contract\OneC
  */
-interface ServiceInterface
+interface IService
 {
     public function getResponse(string $method, array $params = []): Result;
 }

@@ -3,20 +3,19 @@
  * ==================================================
  * Developer: Alexey Nazarov
  * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * Copyright (c) 2019 - 2023
  * ==================================================
- * bit-umc-php-sdk - EntityInterface.php
- * 10.08.2022 22:38
+ * bit-umc-php-sdk - OneCDataKey.php
+ * 25.11.2023 02:57
  * ==================================================
  */
-
-namespace ANZ\BitUmc\SDK\Core\Contract;
+namespace ANZ\BitUmc\SDK\Core\Enumeration;
 
 /**
- * Interface EntityInterface
- * @package ANZ\BitUmc\SDK\Core\Contract
+ * @enum OneCDataKey
+ * @package ANZ\BitUmc\SDK\Core\Enumeration
  */
-interface EntityInterface
+enum OneCDataKey
 {
 
 }

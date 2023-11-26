@@ -9,25 +9,24 @@
  * 04.08.2022 01:16
  * ==================================================
  */
-
 namespace ANZ\BitUmc\SDK\Service\OneC;
 
-use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
-use ANZ\BitUmc\SDK\Core\Contract\ServiceInterface;
+use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
+use ANZ\BitUmc\SDK\Core\Contract\Service\IService;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
  * Class Common
  * @package ANZ\BitUmc\SDK\Service\OneC
  */
-abstract class Common implements ServiceInterface
+abstract class Common implements IService
 {
-    protected ApiClient $client;
+    protected IClient $client;
 
     /**
      * Common constructor.
      */
-    public function __construct(ApiClient $client)
+    public function __construct(IClient $client)
     {
         $this->client = $client;
     }

@@ -12,9 +12,9 @@
 
 namespace ANZ\BitUmc\SDK\Service\Factory;
 
-use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
-use ANZ\BitUmc\SDK\Core\Contract\FactoryInterface;
-use ANZ\BitUmc\SDK\Service\OneC\Common;
+use ANZ\BitUmc\SDK\Core\Contract\IFactory;
+use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
+use ANZ\BitUmc\SDK\Core\Enumeration\ClientScope;
 use ANZ\BitUmc\SDK\Service\OneC\HsReader;
 use ANZ\BitUmc\SDK\Service\OneC\HsWriter;
 use ANZ\BitUmc\SDK\Service\OneC\WsReader;
@@ -24,48 +24,46 @@ use ANZ\BitUmc\SDK\Service\OneC\WsWriter;
  * Class ServiceFactory
  * @package ANZ\BitUmc\SDK\Service
  */
-class ServiceFactory implements FactoryInterface
+class ServiceFactory implements IFactory
 {
-    private ApiClient $client;
+    private IClient $client;
 
     /**
-     * ServiceFactory constructor.
-     * @param \ANZ\BitUmc\SDK\Core\Contract\ApiClient $client
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Connection\IClient $client
+     * @return static
      */
-    public function __construct(ApiClient $client)
+    public static function initByClient(IClient $client): static
     {
-        $this->client = $client;
+        $factory = new static();
+        $factory->client = $client;
+        return $factory;
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Service\OneC\WsReader|\ANZ\BitUmc\SDK\Service\OneC\HsReader
+     * @return \ANZ\BitUmc\SDK\Service\OneC\HsReader|\ANZ\BitUmc\SDK\Service\OneC\WsReader
      */
-    public function getReader(): Common
+    public function getReader(): HsReader | WsReader
     {
-        if($this->client->isHsScope())
-        {
-            $serviceClass = HsReader::class;
-        }
-        else
-        {
-            $serviceClass = WsReader::class;
-        }
+        $serviceClass = match ($this->client->getScope()) {
+            ClientScope::HTTP_SERVICE => HsReader::class,
+            ClientScope::WEB_SERVICE => WsReader::class,
+        };
+
         return (new $serviceClass($this->client));
     }
 
     /**
      * @return \ANZ\BitUmc\SDK\Service\OneC\WsWriter|\ANZ\BitUmc\SDK\Service\OneC\HsWriter
      */
-    public function getWriter(): Common
+    public function getWriter(): WsWriter|HsWriter
     {
-        if($this->client->isHsScope())
-        {
-            $serviceClass = HsWriter::class;
-        }
-        else
-        {
-            $serviceClass = WsWriter::class;
-        }
+        $serviceClass = match ($this->client->getScope()) {
+            ClientScope::HTTP_SERVICE => HsWriter::class,
+            ClientScope::WEB_SERVICE => WsWriter::class,
+        };
+
         return (new $serviceClass($this->client));
     }
+
+    protected function __construct(){}
 }

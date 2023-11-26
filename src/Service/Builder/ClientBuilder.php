@@ -12,35 +12,31 @@
 
 namespace ANZ\BitUmc\SDK\Service\Builder;
 
-use ANZ\BitUmc\SDK\Core\Contract\ApiClient;
-use ANZ\BitUmc\SDK\Core\Contract\BuilderInterface;
-use ANZ\BitUmc\SDK\Api\HsClient;
-use ANZ\BitUmc\SDK\Api\WsClient;
+use ANZ\BitUmc\SDK\Client\HttpClient;
+use ANZ\BitUmc\SDK\Client\SoapClient;
+use ANZ\BitUmc\SDK\Core\Contract\IBuilder;
+use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
+use ANZ\BitUmc\SDK\Core\Enumeration\ClientScope;
+use ANZ\BitUmc\SDK\Core\Enumeration\Protocol;
 use Exception;
 
 /**
  * Class ClientBuilder
  * @package ANZ\BitUmc\SDK\Service\Builder
  */
-class ClientBuilder implements BuilderInterface
+class ClientBuilder implements IBuilder
 {
-    private string $login;
-    private string $password;
-    private bool   $https;
-    private string $address;
-    private string $baseName;
-    private string $useHsScope;
-
-    public function __construct()
-    {
-        $this->https      = false;
-        $this->useHsScope = false;
-    }
+    private ?string $login = null;
+    private ?string $password = null;
+    private ?Protocol $publicationProtocol = null;
+    private ?string $publicationAddress = null;
+    private ?string $baseName = null;
+    private ?ClientScope $scope = null;
 
     /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\ClientBuilder
+     * @return static
      */
-    public static function init(): ClientBuilder
+    public static function init(): static
     {
         return new static();
     }
@@ -66,22 +62,22 @@ class ClientBuilder implements BuilderInterface
     }
 
     /**
-     * @param bool $enabled
+     * @param \ANZ\BitUmc\SDK\Core\Enumeration\Protocol $protocol
      * @return $this
      */
-    public function setHttps(bool $enabled): ClientBuilder
+    public function setPublicationProtocol(Protocol $protocol): ClientBuilder
     {
-        $this->https = $enabled;
+        $this->publicationProtocol = $protocol;
         return $this;
     }
 
     /**
-     * @param string $address
+     * @param string $publicationAddress
      * @return $this
      */
-    public function setAddress(string $address): ClientBuilder
+    public function setPublicationAddress(string $publicationAddress): ClientBuilder
     {
-        $this->address = $address;
+        $this->publicationAddress = $publicationAddress;
         return $this;
     }
 
@@ -95,30 +91,44 @@ class ClientBuilder implements BuilderInterface
         return $this;
     }
 
-    public function setHsScope(): ClientBuilder
+    /**
+     * @param \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope $scope
+     * @return $this
+     */
+    public function setScope(ClientScope $scope): ClientBuilder
     {
-        $this->useHsScope = true;
+        $this->scope = $scope;
         return $this;
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Core\Contract\ApiClient
+     * @return \ANZ\BitUmc\SDK\Core\Contract\Connection\IClient
      * @throws \Exception
      */
-    public function build(): ApiClient
+    public function build(): IClient
     {
         $this->checkFields();
 
-        if($this->useHsScope)
+        /** @var null | IClient $clientClass */
+        $clientClass = match ($this->scope){
+            ClientScope::HTTP_SERVICE => HttpClient::class,
+            ClientScope::WEB_SERVICE => SoapClient::class,
+            default => null
+        };
+
+        if (is_null($clientClass))
         {
-            $clientClass = HsClient::class;
-        }
-        else
-        {
-            $clientClass = WsClient::class;
+            throw new Exception('Can not determine class of client by scope ' . $this->scope->value);
         }
 
-        return new $clientClass( $this->login, $this->password, $this->https, $this->address, $this->baseName );
+        return $clientClass::create(
+            $this->login,
+            $this->password,
+            $this->publicationProtocol,
+            $this->publicationAddress,
+            $this->baseName,
+            $this->scope
+        );
     }
 
     /**
@@ -126,19 +136,45 @@ class ClientBuilder implements BuilderInterface
      */
     protected function checkFields(): void
     {
+        $errorMessage = '';
+
         if (empty($this->login)){
-            throw new Exception("Can not init client without login");
+            $errorMessage = $this->getErrorMessageByProperty('login');
         }
         if (empty($this->password)){
-            throw new Exception("Can not init client without password");
+            $errorMessage = $this->getErrorMessageByProperty('password');
         }
-        if (empty($this->address))
+        if (empty($this->publicationProtocol)){
+            $errorMessage = $this->getErrorMessageByProperty('publicationProtocol');
+        }
+        if (empty($this->publicationAddress))
         {
-            throw new Exception("Can not create client without 1c base's publication address");
+            $errorMessage = $this->getErrorMessageByProperty('publicationAddress');
         }
         if (empty($this->baseName))
         {
-            throw new Exception("Can not create client without name of 1c base");
+            $errorMessage = $this->getErrorMessageByProperty('baseName');
         }
+        if (empty($this->scope))
+        {
+            $errorMessage = $this->getErrorMessageByProperty('scope');
+        }
+
+        if (!empty($errorMessage))
+        {
+            throw new Exception("Can not init client without login");
+        }
+    }
+
+    /**
+     * @param string $propName
+     * @return string
+     */
+    protected function getErrorMessageByProperty(string $propName): string
+    {
+        return sprintf(
+            'Can not init client without %s. Use set%s() method of ' . static::class,
+            $propName, ucfirst($propName)
+        );
     }
 }
