@@ -26,6 +26,7 @@
         "php": ">=8.1",
         "ext-soap": "*",
         "ext-simplexml": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "psr/log": "3.0"
     }
 }

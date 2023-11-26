@@ -6,7 +6,6 @@ use ANZ\BitUmc\SDK\Core\Enumeration\Protocol;
 use ANZ\BitUmc\SDK\Service\Builder\ClientBuilder;
 use ANZ\BitUmc\SDK\Service\Builder\OrderBuilder;
 use ANZ\BitUmc\SDK\Service\Factory\ServiceFactory;
-use ANZ\BitUmc\SDK\Tools\Debug;
 
 try {
     $client = ClientBuilder::init()
@@ -85,11 +84,11 @@ try {
 
     if ($res->isSuccess())
     {
-        Debug::print('Result success', $res->getData());
+        \ANZ\BitUmc\SDK\Debug\Logger::print('Result success', $res->getData());
     }
     else
     {
-        Debug::print('Result error', $res->getErrorMessages());
+        \ANZ\BitUmc\SDK\Debug\Logger::print('Result error', $res->getErrorMessages());
     }
 }
 catch (Exception $e)
