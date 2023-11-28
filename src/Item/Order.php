@@ -10,15 +10,15 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Entity;
+namespace ANZ\BitUmc\SDK\Item;
 
-use ANZ\BitUmc\SDK\Core\Contract\EntityInterface;
+use ANZ\BitUmc\SDK\Core\Contract\Adapter\IAdaptableItem;
 
 /**
  * Class Order
  * @package ANZ\BitUmc\SDK\Entity
  */
-class Order implements EntityInterface
+class Order implements IAdaptableItem
 {
     private string $specialtyName;
     private string $date;
@@ -55,10 +55,20 @@ class Order implements EntityInterface
         $this->email           = $email;
         $this->address         = $address;
         $this->comment         = $comment;
-        $this->orderUid      = $orderUid;
+        $this->orderUid        = $orderUid;
         $this->clientBirthday  = $clientBirthday;
         $this->serviceDuration = $serviceDuration;
         $this->services        = $services;
+    }
+
+    public function getCompatibleData(): array
+    {
+        // TODO: Implement getCompatibleData() method.
+    }
+
+    public static function fromArray(array $data): static
+    {
+        // TODO: Implement fromArray() method.
     }
 
     /**

@@ -5,17 +5,18 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2023
  * ==================================================
- * bit-umc-php-sdk - OneCDataKey.php
- * 25.11.2023 02:57
+ * bit-umc-php-sdk - SoapResponseKey.php
+ * 28.11.2023 23:49
  * ==================================================
  */
-namespace ANZ\BitUmc\SDK\Core\Enumeration;
+
+namespace ANZ\BitUmc\SDK\Core\Dictionary;
 
 /**
- * @enum OneCDataKey
- * @package ANZ\BitUmc\SDK\Core\Enumeration
+ * @enum SoapResponseKey
+ * @package ANZ\BitUmc\SDK\Core\Dictionary
  */
-enum OneCDataKey
+enum SoapResponseKey
 {
 
 }

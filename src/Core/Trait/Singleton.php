@@ -10,11 +10,11 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Core\Traits;
+namespace ANZ\BitUmc\SDK\Core\Trait;
 
 /**
  * Trait Singleton
- * @package ANZ\BitUmc\SDK\Core\Traits
+ * @package ANZ\BitUmc\SDK\Core\Trait
  */
 trait Singleton
 {

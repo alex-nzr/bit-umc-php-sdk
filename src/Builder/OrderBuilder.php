@@ -10,10 +10,10 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\Builder;
+namespace ANZ\BitUmc\SDK\Builder;
 
 use ANZ\BitUmc\SDK\Core\Contract\BuilderInterface;
-use ANZ\BitUmc\SDK\Entity\Order;
+use ANZ\BitUmc\SDK\Item\Order;
 use ANZ\BitUmc\SDK\Tools\Utils;
 use DateTime;
 use Exception;
@@ -258,7 +258,7 @@ class OrderBuilder implements BuilderInterface
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Entity\Order
+     * @return \ANZ\BitUmc\SDK\Item\Order
      * @throws \Exception
      */
     public function build(): Order

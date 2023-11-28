@@ -11,11 +11,11 @@
  */
 
 
-namespace ANZ\BitUmc\SDK\Core\Enumeration;
+namespace ANZ\BitUmc\SDK\Core\Dictionary;
 
 /**
  * @enum Protocol
- * @package ANZ\BitUmc\SDK\Core\Enumeration
+ * @package ANZ\BitUmc\SDK\Core\Dictionary
  */
 enum Protocol: string
 {

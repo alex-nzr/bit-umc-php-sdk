@@ -13,9 +13,10 @@
 namespace ANZ\BitUmc\SDK\Client;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
-use ANZ\BitUmc\SDK\Core\Enumeration\ClientScope;
-use ANZ\BitUmc\SDK\Core\Enumeration\Protocol;
-use ANZ\BitUmc\SDK\Core\Enumeration\SoapMethod;
+use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
+use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
+use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
+use ANZ\BitUmc\SDK\Core\Dictionary\SoapMethod;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 use ANZ\BitUmc\SDK\Tools\XmlParser;
 use Exception;
@@ -29,28 +30,43 @@ use SoapVar;
 class SoapClient extends \SoapClient implements IClient
 {
     private ClientScope $scope;
+    private string $login = '';
+    private string $password = '';
 
     /**
      * SoapClient constructor closed. Use method create() instead
      * @param $wsdl
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope $scope
      * @param array|null $options
      * @throws \Exception
      */
-    private function __construct($wsdl, array $options = null)
+    private function __construct($wsdl, ClientScope $scope, array $options = null)
     {
         if (!class_exists('\SoapClient')) {
             throw new Exception("SOAP extension not found");
         }
+        $this->setScope($scope);
+
+        if(key_exists('login', $options) && !empty($options['login']))
+        {
+            $this->login = (string)$options['login'];
+        }
+
+        if(key_exists('password', $options) && !empty($options['password']))
+        {
+            $this->password = (string)$options['password'];
+        }
+
         parent::__construct($wsdl, $options);
     }
 
     /**
      * @param string $login
      * @param string $password
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\Protocol $protocol
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\Protocol $protocol
      * @param string $address
      * @param string $baseName
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope $scope
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope $scope
      * @return static
      * @throws \Exception
      */
@@ -60,6 +76,7 @@ class SoapClient extends \SoapClient implements IClient
     {
         return new static(
             static::getFullBaseUrl($protocol, $address, $baseName),
+            $scope,
             [
                 'login'          => $login,
                 'password'       => $password,
@@ -83,7 +100,7 @@ class SoapClient extends \SoapClient implements IClient
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\Protocol $protocol
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\Protocol $protocol
      * @param string $address
      * @param string $baseName
      * @return string
@@ -94,7 +111,7 @@ class SoapClient extends \SoapClient implements IClient
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\Protocol $protocol
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\Protocol $protocol
      * @param string $address
      * @param string $baseName
      * @return string
@@ -105,23 +122,17 @@ class SoapClient extends \SoapClient implements IClient
     }
 
     /**
-     * @param string $method
-     * @param array $params
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity $requestEntity
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    public function send(string $method, array $params = []): Result
+    public function send(IRequestEntity $requestEntity): Result
     {
         $result = new Result();
         try
         {
-            if (array_key_exists('Params', $params) && is_array($params['Params']))
-            {
-                $params['Params'] = $this->prepareSoapParams($params['Params']);
-            }
-
-            $soapParams = ['parameters' => $params];
-
-            $response = $this->__soapCall($method, $soapParams);
+            $method = $requestEntity->getRequestMethod();
+            //todo validation of method (in_array($method, $this->__getMethods()))
+            $response = $this->$method($requestEntity);
 
             if (is_object($response) && property_exists($response, 'return'))
             {
@@ -194,31 +205,7 @@ class SoapClient extends \SoapClient implements IClient
     }
 
     /**
-     * @param array $params
-     * @return SoapVar[]
-     */
-    protected function prepareSoapParams(array $params): array
-    {
-        $soapParams = [];
-        foreach ($params as $key => $param)
-        {
-            $paramValue = $param;
-            if (is_array($param))
-            {
-                $paramValue = implode(';', array_filter($param, function ($val){
-                    return is_string($val);
-                }));
-            }
-            $soapParams[] = new SoapVar(
-                '<ns2:Property name="'.$key.'"><ns2:Value>'.$paramValue.'</ns2:Value></ns2:Property>',
-                XSD_ANYXML
-            );
-        }
-        return $soapParams;
-    }
-
-    /**
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope $scope
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope $scope
      * @return void
      */
     public function setScope(ClientScope $scope): void
@@ -227,7 +214,7 @@ class SoapClient extends \SoapClient implements IClient
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope
+     * @return \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope
      */
     public function getScope(): ClientScope
     {

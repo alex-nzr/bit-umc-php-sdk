@@ -11,13 +11,18 @@
  */
 namespace ANZ\BitUmc\SDK\Core\Contract\Service;
 
+use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
  * @interface IService
  * @package ANZ\BitUmc\SDK\Core\Contract\OneC
  */
-interface IService
+interface IExchangeService
 {
-    public function getResponse(string $method, array $params = []): Result;
+    /**
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity $requestEntity
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getResponse(IRequestEntity $requestEntity): Result;
 }

@@ -11,8 +11,9 @@
  */
 namespace ANZ\BitUmc\SDK\Core\Contract\Connection;
 
-use ANZ\BitUmc\SDK\Core\Enumeration\ClientScope;
-use ANZ\BitUmc\SDK\Core\Enumeration\Protocol;
+use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
+use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
+use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
@@ -24,10 +25,10 @@ interface IClient
     /**
      * @param string $login
      * @param string $password
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\Protocol $protocol
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\Protocol $protocol
      * @param string $address
      * @param string $baseName
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope $scope
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope $scope
      * @return static
      */
     public static function create(
@@ -35,20 +36,19 @@ interface IClient
     ): static;
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope $scope
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope $scope
      * @return void
      */
     public function setScope(ClientScope $scope): void;
 
     /**
-     * @return \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope
+     * @return \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope
      */
     public function getScope(): ClientScope;
 
     /**
-     * @param string $method
-     * @param array $params
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity $requestEntity
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    public function send(string $method, array $params): Result;
+    public function send(IRequestEntity $requestEntity): Result;
 }

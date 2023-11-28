@@ -9,35 +9,32 @@
  * 04.08.2022 01:16
  * ==================================================
  */
-namespace ANZ\BitUmc\SDK\Service\OneC;
+namespace ANZ\BitUmc\SDK\Service\Exchange;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
-use ANZ\BitUmc\SDK\Core\Contract\Service\IService;
+use ANZ\BitUmc\SDK\Core\Contract\Service\IExchangeService;
+use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
  * Class Common
  * @package ANZ\BitUmc\SDK\Service\OneC
  */
-abstract class Common implements IService
+abstract class Base implements IExchangeService
 {
     protected IClient $client;
 
     /**
-     * Common constructor.
+     * Base constructor
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Connection\IClient $client
      */
     public function __construct(IClient $client)
     {
         $this->client = $client;
     }
 
-    /**
-     * @param string $method
-     * @param array $params
-     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
-     */
-    public function getResponse(string $method, array $params = []): Result
+    public function getResponse(IRequestEntity $requestEntity): Result
     {
-        return $this->client->send($method, $params);
+        return $this->client->send($requestEntity);
     }
 }

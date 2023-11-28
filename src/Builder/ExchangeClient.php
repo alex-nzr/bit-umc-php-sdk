@@ -5,26 +5,26 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - ClientBuilder.php
+ * bit-umc-php-sdk - ExchangeClient.php
  * 06.08.2022 21:52
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Service\Builder;
+namespace ANZ\BitUmc\SDK\Builder;
 
 use ANZ\BitUmc\SDK\Client\HttpClient;
 use ANZ\BitUmc\SDK\Client\SoapClient;
-use ANZ\BitUmc\SDK\Core\Contract\IBuilder;
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
-use ANZ\BitUmc\SDK\Core\Enumeration\ClientScope;
-use ANZ\BitUmc\SDK\Core\Enumeration\Protocol;
+use ANZ\BitUmc\SDK\Core\Contract\IBuilder;
+use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
+use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 use Exception;
 
 /**
- * Class ClientBuilder
- * @package ANZ\BitUmc\SDK\Service\Builder
+ * @class ExchangeClient
+ * @package ANZ\BitUmc\SDK\Builder
  */
-class ClientBuilder implements IBuilder
+class ExchangeClient implements IBuilder
 {
     private ?string $login = null;
     private ?string $password = null;
@@ -45,7 +45,7 @@ class ClientBuilder implements IBuilder
      * @param string $login
      * @return $this
      */
-    public function setLogin(string $login): ClientBuilder
+    public function setLogin(string $login): ExchangeClient
     {
         $this->login = $login;
         return $this;
@@ -55,17 +55,17 @@ class ClientBuilder implements IBuilder
      * @param string $password
      * @return $this
      */
-    public function setPassword(string $password): ClientBuilder
+    public function setPassword(string $password): ExchangeClient
     {
         $this->password = $password;
         return $this;
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\Protocol $protocol
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\Protocol $protocol
      * @return $this
      */
-    public function setPublicationProtocol(Protocol $protocol): ClientBuilder
+    public function setPublicationProtocol(Protocol $protocol): ExchangeClient
     {
         $this->publicationProtocol = $protocol;
         return $this;
@@ -75,7 +75,7 @@ class ClientBuilder implements IBuilder
      * @param string $publicationAddress
      * @return $this
      */
-    public function setPublicationAddress(string $publicationAddress): ClientBuilder
+    public function setPublicationAddress(string $publicationAddress): ExchangeClient
     {
         $this->publicationAddress = $publicationAddress;
         return $this;
@@ -85,17 +85,17 @@ class ClientBuilder implements IBuilder
      * @param string $baseName
      * @return $this
      */
-    public function setBaseName(string $baseName): ClientBuilder
+    public function setBaseName(string $baseName): ExchangeClient
     {
         $this->baseName = $baseName;
         return $this;
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Enumeration\ClientScope $scope
+     * @param \ANZ\BitUmc\SDK\Core\Dictionary\ClientScope $scope
      * @return $this
      */
-    public function setScope(ClientScope $scope): ClientBuilder
+    public function setScope(ClientScope $scope): ExchangeClient
     {
         $this->scope = $scope;
         return $this;

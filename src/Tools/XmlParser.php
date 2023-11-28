@@ -12,7 +12,7 @@
 
 namespace ANZ\BitUmc\SDK\Tools;
 
-use ANZ\BitUmc\SDK\Core\Traits\Singleton;
+use ANZ\BitUmc\SDK\Core\Trait\Singleton;
 use Exception;
 use SimpleXMLElement;
 

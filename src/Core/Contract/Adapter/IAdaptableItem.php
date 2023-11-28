@@ -23,11 +23,6 @@ interface IAdaptableItem
     public function getCompatibleData(): array;
 
     /**
-     * @return static
-     */
-    public static function create(): static;
-
-    /**
      * @param array $data
      * @return static
      */

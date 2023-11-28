@@ -3,28 +3,91 @@
  * ==================================================
  * Developer: Alexey Nazarov
  * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * Copyright (c) 2019 - 2023
  * ==================================================
- * bit-umc-php-sdk - WsWriter.php
- * 04.08.2022 01:43
+ * bit-umc-php-sdk - Soap.php
+ * 28.11.2023 22:54
  * ==================================================
  */
+namespace ANZ\BitUmc\SDK\Service\Exchange;
 
-namespace ANZ\BitUmc\SDK\Service\OneC;
-
+use ANZ\BitUmc\SDK\Core\Dictionary\SoapMethod;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
-use ANZ\BitUmc\SDK\Core\Soap\SoapMethod;
-use ANZ\BitUmc\SDK\Entity\Order;
+use ANZ\BitUmc\SDK\Core\Request\Entity\Soap\GetSchedule20;
+use ANZ\BitUmc\SDK\Item\Order;
 use ANZ\BitUmc\SDK\Tools\Utils;
 
 /**
- * Class WsWriter
- * @package ANZ\BitUmc\SDK\Service\OneC
+ * @class Soap
+ * @package ANZ\BitUmc\SDK\Service\Exchange
  */
-class WsWriter extends Common
+class Soap extends Base
 {
     /**
-     * @param \ANZ\BitUmc\SDK\Entity\Order $reserve
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getClinics(): Result
+    {
+        return $this->getResponse(SoapMethod::CLINIC_ACTION_1C->value);
+    }
+
+    /**
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getEmployees(): Result
+    {
+        return $this->getResponse(SoapMethod::EMPLOYEES_ACTION_1C->value);
+    }
+
+    /**
+     * @param string $clinicGuid
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getNomenclature(string $clinicGuid): Result
+    {
+        /*$GetNomenclatureAndPrices = new \stdClass();
+
+        $GetNomenclatureAndPrices->Clinic = $clinicGuid;
+
+        $GetNomenclatureAndPrices->Params = new \stdClass();
+
+        $method = SoapMethod::NOMENCLATURE_ACTION_1C->value;
+        $response = $this->client->$method($GetNomenclatureAndPrices);
+
+        Logger::print($response);die();*/
+
+        $params = [
+            'Clinic' => $clinicGuid,
+            'Params' => []
+        ];
+        return $this->getResponse(SoapMethod::NOMENCLATURE_ACTION_1C->value, $params);
+    }
+
+    /**
+     * @param int $days
+     * @param string $clinicGuid
+     * @param array $employees
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getSchedule(int $days = 14, string $clinicGuid = '', array $employees = []): Result
+    {
+        return $this->getResponse(new GetSchedule20($days, $clinicGuid, $employees));
+    }
+
+    /**
+     * @param string $orderUid
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getOrderStatus(string $orderUid): Result
+    {
+        $params = [
+            'GUID' => $orderUid
+        ];
+        return $this->getResponse(SoapMethod::GET_ORDER_STATUS_ACTION_1C->value, $params);
+    }
+
+    /**
+     * @param \ANZ\BitUmc\SDK\Item\Order $reserve
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function sendReserve(Order $reserve): Result
@@ -36,11 +99,11 @@ class WsWriter extends Common
             'EmployeeID'     => $reserve->getEmployeeUid(),
             'Clinic'         => $reserve->getClinicUid(),
         ];
-        return $this->getResponse(SoapMethod::CREATE_RESERVE_ACTION_1C, $params);
+        return $this->getResponse(SoapMethod::CREATE_RESERVE_ACTION_1C->value, $params);
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Entity\Order $waitList
+     * @param \ANZ\BitUmc\SDK\Item\Order $waitList
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function sendWaitList(Order $waitList): Result
@@ -58,11 +121,11 @@ class WsWriter extends Common
             'Clinic'            => $waitList->getClinicUid(),
             'Comment'           => $waitList->getComment(),
         ];
-        return $this->getResponse(SoapMethod::CREATE_WAIT_LIST_ACTION_1C, $params);
+        return $this->getResponse(SoapMethod::CREATE_WAIT_LIST_ACTION_1C->value, $params);
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Entity\Order $order
+     * @param \ANZ\BitUmc\SDK\Item\Order $order
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
     public function sendOrder(Order $order): Result
@@ -92,14 +155,18 @@ class WsWriter extends Common
             $params['Params']['DurationType'] = $order->getDurationType();
         }
 
-        return $this->getResponse(SoapMethod::CREATE_ORDER_ACTION_1C, $params);
+        return $this->getResponse(SoapMethod::CREATE_ORDER_ACTION_1C->value, $params);
     }
 
+    /**
+     * @param string $orderUid
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
     public function deleteOrder(string $orderUid): Result
     {
         $params = [
             'GUID' => $orderUid,
         ];
-        return $this->getResponse(SoapMethod::DELETE_ORDER_ACTION_1C, $params);
+        return $this->getResponse(SoapMethod::DELETE_ORDER_ACTION_1C->value, $params);
     }
 }

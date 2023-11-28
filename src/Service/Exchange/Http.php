@@ -5,23 +5,20 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2023
  * ==================================================
- * bit-umc-php-sdk - IFactory.php
- * 26.11.2023 18:42
+ * bit-umc-php-sdk - Http.php
+ * 28.11.2023 22:54
  * ==================================================
  */
-namespace ANZ\BitUmc\SDK\Core\Contract;
+namespace ANZ\BitUmc\SDK\Service\Exchange;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
-use ANZ\BitUmc\SDK\Core\Contract\Service\IExchangeService;
 
 /**
- * @interface IFactory
- * @package ANZ\BitUmc\SDK\Core\Contract
+ * Class is not finished, because this SDK does not work with http-services yet
+ * @class Http
+ * @package ANZ\BitUmc\SDK\Service\Exchange
  */
-interface IFactory
+class Http extends Base
 {
-    /**
-     * @return mixed
-     */
-    public function create(): mixed;
+
 }

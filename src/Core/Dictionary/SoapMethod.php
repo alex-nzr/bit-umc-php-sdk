@@ -9,11 +9,11 @@
  * 26.11.2023 18:44
  * ==================================================
  */
-namespace ANZ\BitUmc\SDK\Core\Enumeration;
+namespace ANZ\BitUmc\SDK\Core\Dictionary;
 
 /**
  * @enum SoapMethod
- * @package ANZ\BitUmc\SDK\Core\Enumeration
+ * @package ANZ\BitUmc\SDK\Core\Dictionary
  */
 enum SoapMethod: string
 {
