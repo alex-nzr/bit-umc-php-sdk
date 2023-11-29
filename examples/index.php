@@ -30,7 +30,7 @@ try
     //$res = $exchangeService->getClinics();
     //$res = $exchangeService->getEmployees();
     //$res = $exchangeService->getNomenclature($clinicUid);
-    $res = $exchangeService->getSchedule(2, $clinicUid, [$empUid1, $empUid2, $empUid3]);
+    $res = $exchangeService->getSchedule(2, $clinicUid, [$empUid1, $empUid2, $empUid3]); //в доке написать про параметр $startDate
     //$res = $exchangeService->getOrderStatus('39d9b2f9-35db-11ed-9bf2-5e3a455eb0cf');
 
     if ($res->isSuccess())

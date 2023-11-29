@@ -13,7 +13,7 @@ namespace ANZ\BitUmc\SDK\Service\Exchange;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
 use ANZ\BitUmc\SDK\Core\Contract\Service\IExchangeService;
-use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
+use ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
 /**
@@ -33,8 +33,12 @@ abstract class Base implements IExchangeService
         $this->client = $client;
     }
 
-    public function getResponse(IRequestEntity $requestEntity): Result
+    /**
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel $requestModel
+     * @return \ANZ\BitUmc\SDK\Core\Operation\Result
+     */
+    public function getResponse(IRequestModel $requestModel): Result
     {
-        return $this->client->send($requestEntity);
+        return $this->client->send($requestModel);
     }
 }

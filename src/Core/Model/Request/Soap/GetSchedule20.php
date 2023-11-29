@@ -9,33 +9,34 @@
  * 29.11.2023 01:18
  * ==================================================
  */
-namespace ANZ\BitUmc\SDK\Core\Request\Entity\Soap;
+namespace ANZ\BitUmc\SDK\Core\Model\Request\Soap;
 
-use ANZ\BitUmc\SDK\Core\Request\Entity\Parameter;
-use ANZ\BitUmc\SDK\Tools\DateTime;
+use ANZ\BitUmc\SDK\Core\Model\Request\Parameter;
+use ANZ\BitUmc\SDK\Tools\DateFormatter;
+use DateTime;
 
 /**
- * @class GetSchedule
- * @package ANZ\BitUmc\SDK\Core\Soap\Request\Entity
+ * @class GetSchedule20
+ * @package ANZ\BitUmc\SDK\Core\Model\Request\Soap
  */
 class GetSchedule20 extends BaseEntity
 {
-    const CLINIC_PARAM_NAME = 'Clinic';
-    const EMPLOYEES_PARAM_NAME = 'Employees';
-
     protected string $StartDate;
     protected string $FinishDate;
 
     /**
-     * GetSchedule constructor
+     * GetSchedule20 constructor
      * @param int $days
      * @param string $clinicGuid
      * @param array $employees
+     * @param \DateTime|null $startDate
      */
-    public function __construct(int $days, string $clinicGuid, array $employees)
+    public function __construct(int $days, string $clinicGuid, array $employees, ?DateTime $startDate = null)
     {
-        $this->StartDate = DateTime::formatTimestampToISO(strtotime('today + 1 days'));
-        $this->FinishDate = DateTime::formatTimestampToISO(strtotime('today + ' . $days . ' days'));
+        $startDateString = ($startDate instanceof DateTime) ? $startDate->format('d F Y') : 'today + 1 days';
+
+        $this->StartDate = DateFormatter::formatTimestampToISO(strtotime($startDateString));
+        $this->FinishDate = DateFormatter::formatTimestampToISO(strtotime($startDateString . ' + ' . $days . ' days'));
 
         if (!empty($clinicGuid))
         {
@@ -51,21 +52,5 @@ class GetSchedule20 extends BaseEntity
                 }))
             );
         }
-    }
-
-    /**
-     * @return string
-     */
-    public function getStartDate(): string
-    {
-        return $this->StartDate;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFinishDate(): string
-    {
-        return $this->FinishDate;
     }
 }

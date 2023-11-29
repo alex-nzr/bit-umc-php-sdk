@@ -11,11 +11,18 @@
  */
 namespace ANZ\BitUmc\SDK\Service\Exchange;
 
-use ANZ\BitUmc\SDK\Core\Dictionary\SoapMethod;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\BookAnAppointmentWithParams;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\CancelBookAnAppointment;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\FastBookAnAppointment;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetAppointmentStatus;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetListClinic;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetListEmployees;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetNomenclatureAndPrices;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetReserve;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
-use ANZ\BitUmc\SDK\Core\Request\Entity\Soap\GetSchedule20;
+use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetSchedule20;
 use ANZ\BitUmc\SDK\Item\Order;
-use ANZ\BitUmc\SDK\Tools\Utils;
+use DateTime;
 
 /**
  * @class Soap
@@ -28,7 +35,7 @@ class Soap extends Base
      */
     public function getClinics(): Result
     {
-        return $this->getResponse(SoapMethod::CLINIC_ACTION_1C->value);
+        return $this->getResponse(new GetListClinic());
     }
 
     /**
@@ -36,7 +43,7 @@ class Soap extends Base
      */
     public function getEmployees(): Result
     {
-        return $this->getResponse(SoapMethod::EMPLOYEES_ACTION_1C->value);
+        return $this->getResponse(new GetListEmployees());
     }
 
     /**
@@ -45,33 +52,19 @@ class Soap extends Base
      */
     public function getNomenclature(string $clinicGuid): Result
     {
-        /*$GetNomenclatureAndPrices = new \stdClass();
-
-        $GetNomenclatureAndPrices->Clinic = $clinicGuid;
-
-        $GetNomenclatureAndPrices->Params = new \stdClass();
-
-        $method = SoapMethod::NOMENCLATURE_ACTION_1C->value;
-        $response = $this->client->$method($GetNomenclatureAndPrices);
-
-        Logger::print($response);die();*/
-
-        $params = [
-            'Clinic' => $clinicGuid,
-            'Params' => []
-        ];
-        return $this->getResponse(SoapMethod::NOMENCLATURE_ACTION_1C->value, $params);
+        return $this->getResponse(new GetNomenclatureAndPrices($clinicGuid));
     }
 
     /**
      * @param int $days
      * @param string $clinicGuid
      * @param array $employees
+     * @param \DateTime|null $startDate
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    public function getSchedule(int $days = 14, string $clinicGuid = '', array $employees = []): Result
+    public function getSchedule(int $days = 14, string $clinicGuid = '', array $employees = [], ?DateTime $startDate = null): Result
     {
-        return $this->getResponse(new GetSchedule20($days, $clinicGuid, $employees));
+        return $this->getResponse(new GetSchedule20($days, $clinicGuid, $employees, $startDate));
     }
 
     /**
@@ -80,10 +73,7 @@ class Soap extends Base
      */
     public function getOrderStatus(string $orderUid): Result
     {
-        $params = [
-            'GUID' => $orderUid
-        ];
-        return $this->getResponse(SoapMethod::GET_ORDER_STATUS_ACTION_1C->value, $params);
+        return $this->getResponse(new GetAppointmentStatus($orderUid));
     }
 
     /**
@@ -92,14 +82,7 @@ class Soap extends Base
      */
     public function sendReserve(Order $reserve): Result
     {
-        $params = [
-            'Specialization' => $reserve->getSpecialtyName(),
-            'Date'           => $reserve->getDate(),
-            'TimeBegin'      => $reserve->getTimeBegin(),
-            'EmployeeID'     => $reserve->getEmployeeUid(),
-            'Clinic'         => $reserve->getClinicUid(),
-        ];
-        return $this->getResponse(SoapMethod::CREATE_RESERVE_ACTION_1C->value, $params);
+        return $this->getResponse(new GetReserve($reserve));
     }
 
     /**
@@ -108,20 +91,7 @@ class Soap extends Base
      */
     public function sendWaitList(Order $waitList): Result
     {
-        $params = [
-            'Specialization'    => $waitList->getSpecialtyName(),
-            'PatientSurname'    => $waitList->getLastName(),
-            'PatientName'       => $waitList->getName(),
-            'PatientFatherName' => $waitList->getSecondName(),
-            'Date'              => $waitList->getDate(),
-            'TimeBegin'         => $waitList->getTimeBegin(),
-            'Phone'             => Utils::formatPhone($waitList->getPhone()),
-            'Email'             => $waitList->getEmail(),
-            'Address'           => $waitList->getAddress(),
-            'Clinic'            => $waitList->getClinicUid(),
-            'Comment'           => $waitList->getComment(),
-        ];
-        return $this->getResponse(SoapMethod::CREATE_WAIT_LIST_ACTION_1C->value, $params);
+        return $this->getResponse(new FastBookAnAppointment($waitList));
     }
 
     /**
@@ -130,32 +100,7 @@ class Soap extends Base
      */
     public function sendOrder(Order $order): Result
     {
-        $params = [
-            'EmployeeID'        => $order->getEmployeeUid(),
-            'PatientSurname'    => $order->getLastName(),
-            'PatientName'       => $order->getName(),
-            'PatientFatherName' => $order->getSecondName(),
-            'Date'              => $order->getDate(),
-            'TimeBegin'         => $order->getTimeBegin(),
-            'Phone'             => Utils::formatPhone($order->getPhone()),
-            'Email'             => $order->getEmail(),
-            'Address'           => $order->getAddress(),
-            'Clinic'            => $order->getClinicUid(),
-            'Comment'           => $order->getComment(),
-            'GUID'              => $order->getOrderUid(),
-            'Params'            => [
-                'Birthday' => $order->getClientBirthday(),
-                'Duration' => $order->getServiceDuration(),
-            ]
-        ];
-
-        if (!empty($order->getServices()))
-        {
-            $params['Params']['Services']     = $order->getServices();
-            $params['Params']['DurationType'] = $order->getDurationType();
-        }
-
-        return $this->getResponse(SoapMethod::CREATE_ORDER_ACTION_1C->value, $params);
+        return $this->getResponse(new BookAnAppointmentWithParams($order));
     }
 
     /**
@@ -164,9 +109,6 @@ class Soap extends Base
      */
     public function deleteOrder(string $orderUid): Result
     {
-        $params = [
-            'GUID' => $orderUid,
-        ];
-        return $this->getResponse(SoapMethod::DELETE_ORDER_ACTION_1C->value, $params);
+        return $this->getResponse(new CancelBookAnAppointment($orderUid));
     }
 }

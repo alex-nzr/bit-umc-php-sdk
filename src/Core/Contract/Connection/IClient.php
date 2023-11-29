@@ -11,7 +11,7 @@
  */
 namespace ANZ\BitUmc\SDK\Core\Contract\Connection;
 
-use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
+use ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel;
 use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
 use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
@@ -47,8 +47,8 @@ interface IClient
     public function getScope(): ClientScope;
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity $requestEntity
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel $requestModel
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    public function send(IRequestEntity $requestEntity): Result;
+    public function send(IRequestModel $requestModel): Result;
 }

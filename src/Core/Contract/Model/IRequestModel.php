@@ -5,18 +5,18 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2023
  * ==================================================
- * bit-umc-php-sdk - IRequestEntity.php
+ * bit-umc-php-sdk - IRequestModel.php
  * 29.11.2023 01:22
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Core\Contract\Soap;
+namespace ANZ\BitUmc\SDK\Core\Contract\Model;
 
 /**
- * @interface IRequestEntity
+ * @interface IRequestModel
  * @package ANZ\BitUmc\SDK\Core\Contract\Soap
  */
-interface IRequestEntity
+interface IRequestModel
 {
     public function getRequestMethod(): string;
 }

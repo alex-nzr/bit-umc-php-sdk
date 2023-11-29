@@ -198,12 +198,4 @@ class Order implements IAdaptableItem
     {
         return implode(';', $this->services);
     }
-
-    /**
-     * @return string
-     */
-    public function getDurationType(): string
-    {
-        return 'ServiceDuration';
-    }
 }

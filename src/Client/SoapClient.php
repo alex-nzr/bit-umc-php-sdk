@@ -13,15 +13,14 @@
 namespace ANZ\BitUmc\SDK\Client;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
-use ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity;
+use ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel;
 use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
 use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 use ANZ\BitUmc\SDK\Core\Dictionary\SoapMethod;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
-use ANZ\BitUmc\SDK\Tools\XmlParser;
+use ANZ\BitUmc\SDK\Service\XmlParser;
 use Exception;
 use SimpleXMLElement;
-use SoapVar;
 
 /**
  * Class SoapClient
@@ -30,8 +29,8 @@ use SoapVar;
 class SoapClient extends \SoapClient implements IClient
 {
     private ClientScope $scope;
-    private string $login = '';
-    private string $password = '';
+    //private string $login = '';
+    //private string $password = '';
 
     /**
      * SoapClient constructor closed. Use method create() instead
@@ -47,7 +46,7 @@ class SoapClient extends \SoapClient implements IClient
         }
         $this->setScope($scope);
 
-        if(key_exists('login', $options) && !empty($options['login']))
+        /*if(key_exists('login', $options) && !empty($options['login']))
         {
             $this->login = (string)$options['login'];
         }
@@ -55,7 +54,7 @@ class SoapClient extends \SoapClient implements IClient
         if(key_exists('password', $options) && !empty($options['password']))
         {
             $this->password = (string)$options['password'];
-        }
+        }*/
 
         parent::__construct($wsdl, $options);
     }
@@ -122,17 +121,17 @@ class SoapClient extends \SoapClient implements IClient
     }
 
     /**
-     * @param \ANZ\BitUmc\SDK\Core\Contract\Soap\IRequestEntity $requestEntity
+     * @param \ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel $requestModel
      * @return \ANZ\BitUmc\SDK\Core\Operation\Result
      */
-    public function send(IRequestEntity $requestEntity): Result
+    public function send(IRequestModel $requestModel): Result
     {
         $result = new Result();
         try
         {
-            $method = $requestEntity->getRequestMethod();
+            $method = $requestModel->getRequestMethod();
             //todo validation of method (in_array($method, $this->__getMethods()))
-            $response = $this->$method($requestEntity);
+            $response = $this->$method($requestModel);
 
             if (is_object($response) && property_exists($response, 'return'))
             {
@@ -149,6 +148,8 @@ class SoapClient extends \SoapClient implements IClient
                 {
                     try
                     {
+                        //The xml structure in the response calls warnings.
+                        //There is no way to influence the structure, so warnings is hidden.
                         $xml = @(new SimpleXMLElement($response->return));
                     }
                     catch (Exception $e)

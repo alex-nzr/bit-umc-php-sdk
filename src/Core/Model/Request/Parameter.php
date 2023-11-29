@@ -9,13 +9,13 @@
  * 29.11.2023 01:35
  * ==================================================
  */
-namespace ANZ\BitUmc\SDK\Core\Request\Entity;
+namespace ANZ\BitUmc\SDK\Core\Model\Request;
 
 use stdClass;
 
 /**
  * @class Parameter
- * @package ANZ\BitUmc\SDK\Core\Request\Entity
+ * @package ANZ\BitUmc\SDK\Core\Model\Request
  */
 class Parameter extends stdClass
 {

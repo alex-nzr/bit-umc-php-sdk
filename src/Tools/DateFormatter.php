@@ -12,11 +12,13 @@
 
 namespace ANZ\BitUmc\SDK\Tools;
 
+use DateTime;
+
 /**
  * Class DateTime
  * @package ANZ\BitUmc\SDK\Tools
  */
-class DateTime extends \DateTime
+class DateFormatter
 {
     /**
      * formatting timestamp to ISO
@@ -25,9 +27,13 @@ class DateTime extends \DateTime
      */
     public static function formatTimestampToISO(int $timestamp): string
     {
-        return (new static())->setTimestamp($timestamp)->format('Y-m-d\TH:i:s');
+        return (new DateTime())->setTimestamp($timestamp)->format('Y-m-d\TH:i:s');
     }
 
+    /**
+     * @param string $isoTime
+     * @return int
+     */
     public static function formatDurationFromIsoToSeconds(string $isoTime): int
     {
         $minutes = date("i", strtotime($isoTime));

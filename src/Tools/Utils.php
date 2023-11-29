@@ -46,16 +46,11 @@ class Utils
     }
 
     /**
-     * Tests if an array is associative or not.
-     * @param array array to check
-     * @return boolean
+     * @param array $array
+     * @return bool
      */
     public static function is_assoc(array $array): bool
     {
-        if (!is_array($array)){
-            return false;
-        }
-
         // Keys of the array
         $keys = array_keys($array);
         // If the array keys of the keys match the keys, then the array must

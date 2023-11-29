@@ -10,23 +10,23 @@
  * ==================================================
  */
 
-namespace ANZ\BitUmc\SDK\Tools;
+namespace ANZ\BitUmc\SDK\Service;
 
+use ANZ\BitUmc\SDK\Core\Dictionary\SoapResponseKey;
 use ANZ\BitUmc\SDK\Core\Trait\Singleton;
+use ANZ\BitUmc\SDK\Tools\DateFormatter;
+use ANZ\BitUmc\SDK\Tools\Utils;
 use Exception;
 use SimpleXMLElement;
 
 /**
- * Class XmlParser
- * @package ANZ\BitUmc\SDK\Tools
- *
+ * @class XmlParser
+ * @package ANZ\BitUmc\SDK\Service
  * @method static XmlParser getInstance()
  */
 class XmlParser
 {
     use Singleton;
-
-    const EMPTY_SPECIALTY_NAME = 'Без основной специализации';
 
     /**
      * @param SimpleXMLElement $xml
@@ -45,9 +45,9 @@ class XmlParser
     {
         $xmlArr = $this->xmlToArray($xml);
 
-        $clinicKey      = "Клиника";
-        $clinicTitleKey = "Наименование";
-        $clinicUidKey   = "УИД";
+        $clinicKey      = SoapResponseKey::CLINIC->value;
+        $clinicTitleKey = SoapResponseKey::CLINIC_TITLE->value;
+        $clinicUidKey   = SoapResponseKey::CLINIC_UID->value;
 
         $clinics = [];
         if (is_array($xmlArr[$clinicKey]))
@@ -80,18 +80,18 @@ class XmlParser
     {
         $xmlArr = $this->xmlToArray($xml);
 
-        $employeeKey     = "Сотрудник";
-        $organizationKey = "Организация";
-        $nameKey         = "Имя";
-        $lastNameKey     = "Фамилия";
-        $middleNameKey   = "Отчество";
-        $photoKey        = "Фото";
-        $descriptionKey  = "КраткоеОписание";
-        $specialtyKey    = "Специализация";
-        $servicesKey     = "ОсновныеУслуги";
-        $oneServiceKey   = "ОсновнаяУслуга";
-        $durationKey     = "Продолжительность";
-        $ratingKey       = "СреднийРейтинг";
+        $employeeKey     = SoapResponseKey::EMPLOYEE->value;
+        $organizationKey = SoapResponseKey::ORGANIZATION->value;
+        $nameKey         = SoapResponseKey::NAME->value;
+        $lastNameKey     = SoapResponseKey::LAST_NAME->value;
+        $middleNameKey   = SoapResponseKey::MIDDLE_NAME->value;
+        $photoKey        = SoapResponseKey::PHOTO->value;
+        $descriptionKey  = SoapResponseKey::DESCRIPTION->value;
+        $specialtyKey    = SoapResponseKey::SPECIALTY->value;
+        $servicesKey     = SoapResponseKey::SERVICES->value;
+        $oneServiceKey   = SoapResponseKey::MAIN_SERVICE->value;
+        $durationKey     = SoapResponseKey::DURATION->value;
+        $ratingKey       = SoapResponseKey::RATING->value;
 
         $employees = [];
         if (is_array($xmlArr[$employeeKey]))
@@ -102,7 +102,7 @@ class XmlParser
                 $clinicUid = ($item[$organizationKey] == "00000000-0000-0000-0000-000000000000") ? "" : $item[$organizationKey];
                 $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
 
-                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : static::EMPTY_SPECIALTY_NAME;
+                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : SoapResponseKey::EMPTY_SPECIALTY->value;
                 $specialtyUid  = $this->getSpecialtyUid($specialtyName);
 
                 $employee['uid']          = $uid;
@@ -173,7 +173,7 @@ class XmlParser
                 $product['typeOfItem']  = $item[$typeKey];
                 $product['artNumber']   = !empty($item[$artNumberKey]) ? $item[$artNumberKey] : '';
                 $product['price']       = str_replace("[^0-9]", '', $item[$priceKey]);
-                $product['duration']    = DateTime::formatDurationFromIsoToSeconds($item[$durationKey]);
+                $product['duration']    = DateFormatter::formatDurationFromIsoToSeconds($item[$durationKey]);
                 $product['measureUnit'] = !empty($item[$measureUnitKey]) ? $item[$measureUnitKey] : '';
                 $product['parent']      = $item[$parent];
                 $nomenclature[$uid]     = $product;
@@ -231,16 +231,17 @@ class XmlParser
             if (!empty($item[$clinicKey]))
             {
                 $clinicUid = $item[$clinicKey];
-                if (!is_array($formattedSchedule[$clinicUid]))
+                if (!key_exists($clinicUid, $formattedSchedule) || !is_array($formattedSchedule[$clinicUid]))
                 {
                     $formattedSchedule[$clinicUid] = [];
                 }
 
-                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : static::EMPTY_SPECIALTY_NAME;
+                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : SoapResponseKey::EMPTY_SPECIALTY->value;
                 $specialtyUid  = $this->getSpecialtyUid($specialtyName);
 
-                if (!is_array($formattedSchedule[$clinicUid][$specialtyUid]))
-                {
+                if (!key_exists($specialtyUid, $formattedSchedule[$clinicUid])
+                    || !is_array($formattedSchedule[$clinicUid][$specialtyUid])
+                ){
                     $formattedSchedule[$clinicUid][$specialtyUid] = [];
                 }
 
@@ -311,10 +312,10 @@ class XmlParser
     /**
      * @param $array
      * @param int $duration
-     * @param false $useDefaultInterval
+     * @param bool $useDefaultInterval
      * @return array
      */
-    public function formatTimetable($array, int $duration, $useDefaultInterval = false): array
+    public function formatTimetable($array, int $duration, bool $useDefaultInterval = false): array
     {
         if (!is_array($array) || empty($array)){
             return [];
@@ -324,28 +325,46 @@ class XmlParser
             $duration = 1800;
         }
 
-        if (!empty($array))
+        if (Utils::is_assoc($array)) {
+            $array = [$array];
+        }
+
+        $scheduleDateKey  = "Дата";
+        $scheduleStartKey = "ВремяНачала";
+        $scheduleEndKey   = "ВремяОкончания";
+
+        $formattedArray = [];
+        foreach ($array as $item)
         {
-            if (Utils::is_assoc($array)) {
-                $array = [$array];
-            }
+            $formattedDateKey = date("d-m-Y", strtotime($item[$scheduleDateKey]));
 
-            $scheduleDateKey  = "Дата";
-            $scheduleStartKey = "ВремяНачала";
-            $scheduleEndKey   = "ВремяОкончания";
+            $timestampTimeBegin = strtotime($item[$scheduleStartKey]);
+            $timestampTimeEnd = strtotime($item[$scheduleEndKey]);
 
-            $formattedArray = [];
-            foreach ($array as $item)
+            if ($useDefaultInterval)
             {
-                $formattedDateKey = date("d-m-Y", strtotime($item[$scheduleDateKey]));
-
-                $timestampTimeBegin = strtotime($item[$scheduleStartKey]);
-                $timestampTimeEnd = strtotime($item[$scheduleEndKey]);
-
-                if ($useDefaultInterval)
+                $newTimeTableItem = $this->formatTimeTableItem($item, (int)$timestampTimeBegin, (int)$timestampTimeEnd);
+                if (!key_exists($formattedDateKey, $formattedArray) || !is_array($formattedArray[$formattedDateKey]))
                 {
-                    $newTimeTableItem = $this->formatTimeTableItem($item, (int)$timestampTimeBegin, (int)$timestampTimeEnd);
-                    if (!is_array($formattedArray[$formattedDateKey]))
+                    $formattedArray[$formattedDateKey] = [$newTimeTableItem];
+                }
+                else
+                {
+                    $formattedArray[$formattedDateKey][] = $newTimeTableItem;
+                }
+            }
+            else
+            {
+                $timeDifference = $timestampTimeEnd - $timestampTimeBegin;
+                $appointmentsCount = round($timeDifference / $duration);
+
+                for ($i = 0; $i < $appointmentsCount; $i++)
+                {
+                    $start = $timestampTimeBegin + ($duration * $i);
+                    $end = $timestampTimeBegin + ($duration * ($i+1));
+
+                    $newTimeTableItem = $this->formatTimeTableItem($item, (int)$start, (int)$end);
+                    if (!key_exists($formattedDateKey, $formattedArray) || !is_array($formattedArray[$formattedDateKey]))
                     {
                         $formattedArray[$formattedDateKey] = [$newTimeTableItem];
                     }
@@ -354,34 +373,9 @@ class XmlParser
                         $formattedArray[$formattedDateKey][] = $newTimeTableItem;
                     }
                 }
-                else
-                {
-                    $timeDifference = $timestampTimeEnd - $timestampTimeBegin;
-                    $appointmentsCount = round($timeDifference / $duration);
-
-                    for ($i = 0; $i < $appointmentsCount; $i++)
-                    {
-                        $start = $timestampTimeBegin + ($duration * $i);
-                        $end = $timestampTimeBegin + ($duration * ($i+1));
-
-                        $newTimeTableItem = $this->formatTimeTableItem($item, (int)$start, (int)$end);
-                        if (!is_array($formattedArray[$formattedDateKey]))
-                        {
-                            $formattedArray[$formattedDateKey] = [$newTimeTableItem];
-                        }
-                        else
-                        {
-                            $formattedArray[$formattedDateKey][] = $newTimeTableItem;
-                        }
-                    }
-                }
             }
-            return $formattedArray;
         }
-        else
-        {
-            return [];
-        }
+        return $formattedArray;
     }
 
     /**

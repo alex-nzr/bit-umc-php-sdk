@@ -120,7 +120,7 @@ class OrderBuilder implements BuilderInterface
      */
     public function setDateTimeBegin(DateTime $dateTimeBegin): OrderBuilder
     {
-        $isoDate = \ANZ\BitUmc\SDK\Tools\DateTime::formatTimestampToISO($dateTimeBegin->getTimestamp());
+        $isoDate = \ANZ\BitUmc\SDK\Tools\DateFormatter::formatTimestampToISO($dateTimeBegin->getTimestamp());
         $this->date      = $isoDate;
         $this->timeBegin = $isoDate;
         return $this;
@@ -232,7 +232,7 @@ class OrderBuilder implements BuilderInterface
      */
     public function setClientBirthday(DateTime $date): OrderBuilder
     {
-        $isoDate = \ANZ\BitUmc\SDK\Tools\DateTime::formatTimestampToISO($date->getTimestamp());
+        $isoDate = \ANZ\BitUmc\SDK\Tools\DateFormatter::formatTimestampToISO($date->getTimestamp());
         $this->clientBirthday = $isoDate;
         return $this;
     }
