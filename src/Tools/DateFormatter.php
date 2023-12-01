@@ -40,4 +40,36 @@ class DateFormatter
         $hours = date("H", strtotime($isoTime));
         return (int)$minutes*60 + (int)$hours*3600;
     }
+
+    /**
+     * @param int $seconds
+     * @return string
+     */
+    public static function calculateDurationFromSeconds(int $seconds): string
+    {
+        $hours = ($seconds >= 3600) ? round($seconds / 3600) : 0;
+        $minutes = round(($seconds % 3600) / 60);
+
+        $hours   = ($hours > 9) ? $hours : "0".$hours;
+        $minutes = ($minutes > 9) ? $minutes : "0".$minutes;
+
+        return "0001-01-01T".$hours.":".$minutes.":00";
+    }
+
+    /**
+     * @param string $timeBegin
+     * @param string $timeEnd
+     * @return string
+     * @throws \Exception
+     */
+    public static function calculateDurationFromInterval(string $timeBegin, string $timeEnd): string
+    {
+        $startDate = new DateTime($timeBegin);
+        $diff = $startDate->diff(new DateTime($timeEnd));
+
+        $hours   = ($diff->h > 9) ? $diff->h : "0".$diff->h;
+        $minutes = ($diff->i > 9) ? $diff->i : "0".$diff->i;
+
+        return "0001-01-01T".$hours.":".$minutes.":00";
+    }
 }

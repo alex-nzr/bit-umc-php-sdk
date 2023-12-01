@@ -12,7 +12,7 @@
 namespace ANZ\BitUmc\SDK\Core\Model\Request\Soap;
 
 use ANZ\BitUmc\SDK\Item\Order;
-use ANZ\BitUmc\SDK\Tools\Utils;
+use ANZ\BitUmc\SDK\Tools\PhoneFormatter;
 
 /**
  * @class BaseAppointment
@@ -42,7 +42,7 @@ abstract class BaseAppointment extends BaseEntity
         $this->PatientFatherName = $appointment->getSecondName();
         $this->Date              = $appointment->getDate();
         $this->TimeBegin         = $appointment->getTimeBegin();
-        $this->Phone             = Utils::formatPhone($appointment->getPhone());
+        $this->Phone             = PhoneFormatter::formatPhone($appointment->getPhone());
         $this->Email             = $appointment->getEmail();
         $this->Address           = $appointment->getAddress();
         $this->Clinic            = $appointment->getClinicUid();

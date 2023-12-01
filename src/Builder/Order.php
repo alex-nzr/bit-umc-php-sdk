@@ -15,7 +15,6 @@ namespace ANZ\BitUmc\SDK\Builder;
 use ANZ\BitUmc\SDK\Core\Contract\IBuilder;
 use ANZ\BitUmc\SDK\Item\Order as OrderItem;
 use ANZ\BitUmc\SDK\Tools\DateFormatter;
-use ANZ\BitUmc\SDK\Tools\Utils;
 use DateTime;
 use Exception;
 
@@ -191,10 +190,19 @@ class Order implements IBuilder
     /**
      * @param string $email
      * @return $this
+     * @throws \Exception
      */
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        if (!empty($email))
+        {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+            {
+                throw new Exception("Email address $email is not valid");
+            }
+            $this->email = $email;
+        }
+
         return $this;
     }
 
@@ -245,7 +253,7 @@ class Order implements IBuilder
      */
     public function setAppointmentDuration(int $seconds): static
     {
-        $this->serviceDuration = Utils::calculateDurationFromSeconds($seconds);
+        $this->serviceDuration = DateFormatter::calculateDurationFromSeconds($seconds);
         return $this;
     }
 
