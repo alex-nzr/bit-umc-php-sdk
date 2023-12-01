@@ -5,24 +5,25 @@
  * E-mail: jc1988x@gmail.com
  * Copyright (c) 2019 - 2022
  * ==================================================
- * bit-umc-php-sdk - OrderBuilder.php
+ * bit-umc-php-sdk - Order.php
  * 10.08.2022 22:27
  * ==================================================
  */
 
 namespace ANZ\BitUmc\SDK\Builder;
 
-use ANZ\BitUmc\SDK\Core\Contract\BuilderInterface;
-use ANZ\BitUmc\SDK\Item\Order;
+use ANZ\BitUmc\SDK\Core\Contract\IBuilder;
+use ANZ\BitUmc\SDK\Item\Order as OrderItem;
+use ANZ\BitUmc\SDK\Tools\DateFormatter;
 use ANZ\BitUmc\SDK\Tools\Utils;
 use DateTime;
 use Exception;
 
 /**
- * Class OrderBuilder
+ * Class Order
  * @package ANZ\BitUmc\SDK\Service\Builder
  */
-class OrderBuilder implements BuilderInterface
+class Order implements IBuilder
 {
     const WAIT_LIST_MODE = 'WAIT_LIST';
     const RESERVE_MODE   = 'RESERVE';
@@ -42,7 +43,7 @@ class OrderBuilder implements BuilderInterface
     private string $email           = '';
     private string $address         = '';
     private string $comment         = '';
-    private string $orderUid      = '';
+    private string $orderUid        = '';
     private string $clientBirthday  = '';
     private string $serviceDuration = '';
     private array  $services        = [];
@@ -58,7 +59,7 @@ class OrderBuilder implements BuilderInterface
     ];
 
     /**
-     * OrderBuilder constructor.
+     * Order constructor.
      * @param string|null $mode
      */
     private function __construct(?string $mode = null)
@@ -73,42 +74,43 @@ class OrderBuilder implements BuilderInterface
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @param string|null $mode
+     * @return static
      */
-    public static function init(): OrderBuilder
+    public static function init(?string $mode = null): static
     {
-        return new static();
+        return new static($mode);
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return static
      */
-    public static function createWaitList(): OrderBuilder
+    public static function createWaitList(): static
     {
         return new static(static::WAIT_LIST_MODE);
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return static
      */
-    public static function createReserve(): OrderBuilder
+    public static function createReserve(): static
     {
         return new static(static::RESERVE_MODE);
     }
 
     /**
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return static
      */
-    public static function createOrder(): OrderBuilder
+    public static function createOrder(): static
     {
         return new static(static::ORDER_MODE);
     }
 
     /**
      * @param string $specialtyName
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setSpecialtyName(string $specialtyName): OrderBuilder
+    public function setSpecialtyName(string $specialtyName): static
     {
         $this->specialtyName = $specialtyName;
         return $this;
@@ -118,19 +120,19 @@ class OrderBuilder implements BuilderInterface
      * @param \DateTime $dateTimeBegin
      * @return $this
      */
-    public function setDateTimeBegin(DateTime $dateTimeBegin): OrderBuilder
+    public function setDateTimeBegin(DateTime $dateTimeBegin): static
     {
-        $isoDate = \ANZ\BitUmc\SDK\Tools\DateFormatter::formatTimestampToISO($dateTimeBegin->getTimestamp());
-        $this->date      = $isoDate;
+        $isoDate = DateFormatter::formatTimestampToISO($dateTimeBegin->getTimestamp());
+        $this->date = $isoDate;
         $this->timeBegin = $isoDate;
         return $this;
     }
 
     /**
      * @param string $employeeUid
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setEmployeeUid(string $employeeUid): OrderBuilder
+    public function setEmployeeUid(string $employeeUid): static
     {
         $this->employeeUid = $employeeUid;
         return $this;
@@ -138,9 +140,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $clinicUid
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setClinicUid(string $clinicUid): OrderBuilder
+    public function setClinicUid(string $clinicUid): static
     {
         $this->clinicUid = $clinicUid;
         return $this;
@@ -148,9 +150,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $name
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setName(string $name): OrderBuilder
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -158,9 +160,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $lastName
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setLastName(string $lastName): OrderBuilder
+    public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
         return $this;
@@ -168,9 +170,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $secondName
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setSecondName(string $secondName): OrderBuilder
+    public function setSecondName(string $secondName): static
     {
         $this->secondName = $secondName;
         return $this;
@@ -178,9 +180,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $phone
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setPhone(string $phone): OrderBuilder
+    public function setPhone(string $phone): static
     {
         $this->phone = $phone;
         return $this;
@@ -188,9 +190,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $email
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setEmail(string $email): OrderBuilder
+    public function setEmail(string $email): static
     {
         $this->email = $email;
         return $this;
@@ -198,9 +200,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $address
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setAddress(string $address): OrderBuilder
+    public function setAddress(string $address): static
     {
         $this->address = $address;
         return $this;
@@ -208,9 +210,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $comment
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setComment(string $comment): OrderBuilder
+    public function setComment(string $comment): static
     {
         $this->comment = $comment;
         return $this;
@@ -218,9 +220,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param string $orderUid
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setOrderUid(string $orderUid): OrderBuilder
+    public function setOrderUid(string $orderUid): static
     {
         $this->orderUid = $orderUid;
         return $this;
@@ -228,20 +230,20 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param \DateTime $date
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setClientBirthday(DateTime $date): OrderBuilder
+    public function setClientBirthday(DateTime $date): static
     {
-        $isoDate = \ANZ\BitUmc\SDK\Tools\DateFormatter::formatTimestampToISO($date->getTimestamp());
+        $isoDate = DateFormatter::formatTimestampToISO($date->getTimestamp());
         $this->clientBirthday = $isoDate;
         return $this;
     }
 
     /**
      * @param int $seconds
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setAppointmentDuration(int $seconds): OrderBuilder
+    public function setAppointmentDuration(int $seconds): static
     {
         $this->serviceDuration = Utils::calculateDurationFromSeconds($seconds);
         return $this;
@@ -249,9 +251,9 @@ class OrderBuilder implements BuilderInterface
 
     /**
      * @param array $services
-     * @return \ANZ\BitUmc\SDK\Service\Builder\OrderBuilder
+     * @return $this
      */
-    public function setServices(array $services): OrderBuilder
+    public function setServices(array $services): static
     {
         $this->services = $services;
         return $this;
@@ -261,12 +263,12 @@ class OrderBuilder implements BuilderInterface
      * @return \ANZ\BitUmc\SDK\Item\Order
      * @throws \Exception
      */
-    public function build(): Order
+    public function build(): OrderItem
     {
         $this->checkRequiredParams();
         $this->checkAndFillNotRequiredParams();
 
-        return new Order(
+        return new OrderItem(
             $this->specialtyName,
             $this->date,
             $this->timeBegin,

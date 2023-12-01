@@ -19,14 +19,11 @@ namespace ANZ\BitUmc\SDK\Core\Model\Request\Soap;
  */
 class GetAppointmentStatus extends BaseEntity
 {
-    protected string $GUID;
-
     /**
      * GetAppointmentStatus constructor
-     * @param string $appointmentUid
+     * @param string $GUID
      */
-    public function __construct(string $appointmentUid)
+    public function __construct(protected string $GUID)
     {
-        $this->GUID = $appointmentUid;
     }
 }

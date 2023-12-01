@@ -14,7 +14,6 @@ namespace ANZ\BitUmc\SDK\Service;
 
 use ANZ\BitUmc\SDK\Core\Config\Parameters;
 use ANZ\BitUmc\SDK\Core\Dictionary\SoapResponseKey;
-use ANZ\BitUmc\SDK\Core\Trait\Singleton;
 use ANZ\BitUmc\SDK\Tools\DateFormatter;
 use ANZ\BitUmc\SDK\Tools\Utils;
 use Exception;
@@ -23,12 +22,9 @@ use SimpleXMLElement;
 /**
  * @class XmlParser
  * @package ANZ\BitUmc\SDK\Service
- * @method static XmlParser getInstance()
  */
 class XmlParser
 {
-    use Singleton;
-
     /**
      * @param SimpleXMLElement $xml
      * @return array

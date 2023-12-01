@@ -183,7 +183,7 @@ class SoapClient extends \SoapClient implements IClient
      */
     private function handleXML(string $method, SimpleXMLElement $xml): array
     {
-        $parser = XmlParser::getInstance();
+        $parser = new XmlParser();
         return match ($method) {
             SoapMethod::CLINIC_ACTION_1C->value => $parser->prepareClinicData($xml),
 

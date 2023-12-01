@@ -18,19 +18,18 @@ namespace ANZ\BitUmc\SDK\Core\Trait;
  */
 trait Singleton
 {
-    protected static array $instances = [];
+    protected static ?object $instance = null;
 
     /**
-     * @return static
+     * @return object
      */
-    public static function getInstance(): static
+    public static function getInstance(): object
     {
-        $calledClass = get_called_class();
-        if (!isset(static::$instances[$calledClass]))
+        if (empty(static::$instance))
         {
-            static::$instances[$calledClass] = new $calledClass();
+            static::$instance = new static();
         }
-        return static::$instances[$calledClass];
+        return static::$instance;
     }
 
     /**

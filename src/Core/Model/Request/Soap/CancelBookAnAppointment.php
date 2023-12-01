@@ -17,14 +17,11 @@ namespace ANZ\BitUmc\SDK\Core\Model\Request\Soap;
  */
 class CancelBookAnAppointment extends BaseEntity
 {
-    protected string $GUID;
-
     /**
      * CancelBookAnAppointment constructor
-     * @param string $appointmentUid
+     * @param string $GUID
      */
-    public function __construct(string $appointmentUid)
+    public function __construct(protected string $GUID)
     {
-        $this->GUID = $appointmentUid;
     }
 }

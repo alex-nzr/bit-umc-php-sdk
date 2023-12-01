@@ -12,31 +12,12 @@
 
 namespace ANZ\BitUmc\SDK\Item;
 
-use ANZ\BitUmc\SDK\Core\Contract\Adapter\IAdaptableItem;
-
 /**
  * Class Order
  * @package ANZ\BitUmc\SDK\Entity
  */
-class Order implements IAdaptableItem
+class Order
 {
-    private string $specialtyName;
-    private string $date;
-    private string $timeBegin;
-    private string $employeeUid;
-    private string $clinicUid;
-    private string $name;
-    private string $lastName;
-    private string $secondName;
-    private string $phone;
-    private string $email;
-    private string $address;
-    private string $comment;
-    private string $orderUid;
-    private string $clientBirthday;
-    private string $serviceDuration;
-    private array  $services;
-
     /**
      * Order constructor
      * @param string $specialtyName
@@ -57,37 +38,23 @@ class Order implements IAdaptableItem
      * @param array $services
      */
     public function __construct(
-        string $specialtyName,  string $date,  string $timeBegin, string $employeeUid,
-        string $clinicUid,      string $name,  string $lastName,  string $secondName,
-        string $phone,          string $email, string $address,   string $comment,
-        string $orderUid,     string $clientBirthday, string $serviceDuration,  array $services
+        private readonly string $specialtyName,
+        private readonly string $date,
+        private readonly string $timeBegin,
+        private readonly string $employeeUid,
+        private readonly string $clinicUid,
+        private readonly string $name,
+        private readonly string $lastName,
+        private readonly string $secondName,
+        private readonly string $phone,
+        private readonly string $email,
+        private readonly string $address,
+        private readonly string $comment,
+        private readonly string $orderUid,
+        private readonly string $clientBirthday,
+        private readonly string $serviceDuration,
+        private readonly array $services
     ){
-        $this->specialtyName   = $specialtyName;
-        $this->date            = $date;
-        $this->timeBegin       = $timeBegin;
-        $this->employeeUid     = $employeeUid;
-        $this->clinicUid       = $clinicUid;
-        $this->name            = $name;
-        $this->lastName        = $lastName;
-        $this->secondName      = $secondName;
-        $this->phone           = $phone;
-        $this->email           = $email;
-        $this->address         = $address;
-        $this->comment         = $comment;
-        $this->orderUid        = $orderUid;
-        $this->clientBirthday  = $clientBirthday;
-        $this->serviceDuration = $serviceDuration;
-        $this->services        = $services;
-    }
-
-    public function getCompatibleData(): array
-    {
-        // TODO: Implement getCompatibleData() method.
-    }
-
-    public static function fromArray(array $data): static
-    {
-        // TODO: Implement fromArray() method.
     }
 
     /**

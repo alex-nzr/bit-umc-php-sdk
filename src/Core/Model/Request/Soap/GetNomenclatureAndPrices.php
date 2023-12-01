@@ -19,14 +19,11 @@ namespace ANZ\BitUmc\SDK\Core\Model\Request\Soap;
  */
 class GetNomenclatureAndPrices extends BaseEntity
 {
-    protected string $Clinic;
-
     /**
      * GetNomenclatureAndPrices constructor
-     * @param string $clinicGuid
+     * @param string $Clinic
      */
-    public function __construct(string $clinicGuid)
+    public function __construct(protected string $Clinic)
     {
-        $this->Clinic = $clinicGuid;
     }
 }
