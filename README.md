@@ -46,41 +46,42 @@ composer require alex-nzr/bit-umc-sdk:dev-master
 Ниже образец. Логин пользователя 1С -  `1cUser`, пароль -  `1cUserPassword`. 
 База 1С опубликована на веб-сервере и имеет адрес `http://88.29.123.512:3500/umc/`.
 ```
-    use ANZ\BitUmc\SDK\Service\Builder\ClientBuilder;
+    use ANZ\BitUmc\SDK\Builder;
+    use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
+    use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 
-    $client = ClientBuilder::init()
+    $client = Builder\ExchangeClient::init()
                 ->setLogin('1cUser')
                 ->setPassword('1cUserPassword')
-                ->setHttps(false)
-                ->setAddress('88.29.123.512:3500')
+                ->setPublicationProtocol(Protocol::HTTP)
+                ->setPublicationAddress('88.29.123.512:3500')
                 ->setBaseName('umc')
+                ->setScope(ClientScope::WEB_SERVICE)
                 ->build();
 ```
-_Также ClientBuilder имеет метод setHsScope() для подключения не по soap, а по http.
-Но данная возможность ещё не реализована полностью
-и большинство классов представляют собой заглушки, 
-так как http сервисы в БИТ.УМЦ слабо развиты
-(на момент написания этой инструкции имеются сервисы для интеграции
-с Битрикс24 и ЕГИСЗ, а также сервис для создания лида (лист ожидания))._
+_SDK имеет каркас классов для подключения не по soap, а по http.
+Но данная возможность не реализована и большинство классов представляют собой заглушки, 
+так как полноценной интеграции через http-сервисы в БИТ.УМЦ нет, а есть только сервис для создания лида (лист ожидания).
+Он не представляет особого интереса и вести полноценную разработку http-скоупа ради него нет желания.
+Также, на момент написания этой инструкции имеются сервисы для интеграции с Битрикс24 и ЕГИСЗ,
+которые не предоставляют функционал, необходимый для выгрузки расписания и создания заявок.
 
-Следующий шаг — получение сервисов для чтения и записи информации.
+Следующий шаг — создание сервиса для чтения и записи информации.
 ```
-    use ANZ\BitUmc\SDK\Service\Factory\ServiceFactory;
-    use ANZ\BitUmc\SDK\Tools\Debug;
+    use ANZ\BitUmc\SDK\Debug\Logger;
+    use ANZ\BitUmc\SDK\Factory;
 
-    $factory = new ServiceFactory($client);
-    $reader  = $factory->getReader();
-    $writer  = $factory->getWriter();
+    $exchangeService = (new Factory\Exchange($client))->create();
 ```
 
 После этого можно начинать "общение" с 1С.
 
 ### Список клиник
 ```
-    $result = $reader->getClinics();
+    $result = $exchangeService->getClinics();
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -106,7 +107,7 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
     }
     else
     {
-        Debug::print($result->getErrorMessages());
+        Logger::print($result->getErrorMessages());
         /*
         Array
         (
@@ -129,10 +130,10 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
 у сотрудника в соответствующей графе
 будет указано "Без основной специализации"*
 ```
-    $result = $reader->getEmployees();
+    $result = $exchangeService->getEmployees();
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -172,10 +173,10 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
 ### Номенклатура
 ```
     $clinicUid  = 'f679444a-22b7-11df-8618-002618dcef2c';
-    $result     = $reader->getNomenclature($clinicUid);
+    $result     = $exchangeService->getNomenclature($clinicUid);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -247,18 +248,26 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
 
 `typeOfTimeUid` - идентификатор вида времени графика. Кроме идентификатора, никакой информации о нём не предоставляется.
 ```
-    $period       = 21;//days
+    //Необязательный параметр. Нужен для выгрузки расписания начиная с конкретной даты. По умолчанию равен "Сегодня + 1 день"
+    $startDate = DateTime::createFromFormat("d.m.Y", "21.06.2023");
+    
+    //Необязательный параметр. Количество дней за которое нужно выгрузить расписания, начиная от $startDate. По умолчанию - 14.
+    $daysCount       = 21;
+    
+    //Необязательный параметр. По какой клинике выгружать расписание
     $clinicUid    = 'f679444a-22b7-11df-8618-002618dcef2c';
+    
+    //Необязательный параметр. По каким сотрудникам выгружать расписание
     $employeeUids = [
         '19cb6fa5-1578-11ed-9bee-5c3a455eb0d0', 
         '99868528-0928-11dc-93d1-0004614ae652',
         '2eb1f97b-6a3c-11e9-936d-1856809fe650'
     ];
     
-    $res = $reader->getSchedule($period, $clinicUid, $employeUids);
+    $res = $exchangeService->getSchedule($daysCount, $clinicUid, $employeUids, $startDate);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -463,15 +472,15 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
 ### Статус заявки
 ```
     $orderUid  = '39d9b2f9-35db-11ed-9bf2-5e3a455eb0cf';
-    $result     = $reader->getOrderStatus($orderUid);
+    $result     = $exchangeService->getOrderStatus($orderUid);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
             [statusId] => 1
-            [status] => Новая
+            [statusTitle] => Новая
         )
         */
 ```
@@ -502,7 +511,7 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
     $result = $writer->sendWaitList($waitList);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -539,7 +548,7 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
     $res = $writer->sendReserve($reserve);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -584,7 +593,7 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
     $res = $writer->sendOrder($order);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (
@@ -599,7 +608,7 @@ _Также ClientBuilder имеет метод setHsScope() для подклю
     $result     = $writer->deleteOrder($orderUid);
     if ($result->isSuccess())
     {
-        Debug::print($result->getData());
+        Logger::print($result->getData());
         /*
         Array
         (

@@ -1,7 +1,7 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php');
 
-use ANZ\BitUmc\SDK\Builder\ExchangeClient;
+use ANZ\BitUmc\SDK\Builder;
 use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
 use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 use ANZ\BitUmc\SDK\Debug\Logger;
@@ -9,7 +9,7 @@ use ANZ\BitUmc\SDK\Factory;
 
 try
 {
-    $client = ExchangeClient::init()
+    $client = Builder\ExchangeClient::init()
                 ->setLogin('siteIntegration')
                 ->setPassword('123456')
                 ->setPublicationProtocol(Protocol::HTTP)
@@ -30,18 +30,9 @@ try
     //$res = $exchangeService->getClinics();
     //$res = $exchangeService->getEmployees();
     //$res = $exchangeService->getNomenclature($clinicUid);
-    $res = $exchangeService->getSchedule(2, $clinicUid, [$empUid1, $empUid2, $empUid3]); //в доке написать про параметр $startDate
-    //$res = $exchangeService->getOrderStatus('39d9b2f9-35db-11ed-9bf2-5e3a455eb0cf');
 
-    if ($res->isSuccess())
-    {
-        Logger::print('Result success', $res->getData());
-    }
-    else
-    {
-        Logger::print('Result error', $res->getErrorMessages());
-    }
-    die("\r\n END");
+    //$res = $exchangeService->getSchedule(2, $clinicUid, [$empUid1, $empUid2, $empUid3], DateTime::createFromFormat("d.m.Y H:i:s", "21.06.2023 09:00:00"));
+    //$res = $exchangeService->getOrderStatus('39d9b2f9-35db-11ed-9bf2-5e3a455eb0cf');
 
     //В качестве даты и времени записи передаётся объект \DateTime, созданный любым удобным способом
     $dateTimeBegin = DateTime::createFromFormat("d.m.Y H:i:s", "21.09.2022 14:00:00");

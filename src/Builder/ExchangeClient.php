@@ -162,7 +162,7 @@ class ExchangeClient implements IBuilder
 
         if (!empty($errorMessage))
         {
-            throw new Exception("Can not init client without login");
+            throw new Exception($errorMessage);
         }
     }
 

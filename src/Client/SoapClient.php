@@ -130,12 +130,11 @@ class SoapClient extends \SoapClient implements IClient
         try
         {
             $method = $requestModel->getRequestMethod();
-            //todo validation of method (in_array($method, $this->__getMethods()))
             $response = $this->$method($requestModel);
 
             if (is_object($response) && property_exists($response, 'return'))
             {
-                //Sometimes the response formats from the Bit-umc api are amazing...
+                //Sometimes response's formats from Bit-umc api are amazing...
                 if ($response->return === 'Ok')
                 {
                     $result->setData(['success' => true]);
@@ -169,7 +168,8 @@ class SoapClient extends \SoapClient implements IClient
                 throw new Exception("Unexpected format of response returned from 1C");
             }
         }
-        catch (Exception $e){
+        catch (Exception $e)
+        {
             $result->addError($e);
         }
         return $result;

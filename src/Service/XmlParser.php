@@ -12,6 +12,7 @@
 
 namespace ANZ\BitUmc\SDK\Service;
 
+use ANZ\BitUmc\SDK\Core\Config\Parameters;
 use ANZ\BitUmc\SDK\Core\Dictionary\SoapResponseKey;
 use ANZ\BitUmc\SDK\Core\Trait\Singleton;
 use ANZ\BitUmc\SDK\Tools\DateFormatter;
@@ -46,11 +47,11 @@ class XmlParser
         $xmlArr = $this->xmlToArray($xml);
 
         $clinicKey      = SoapResponseKey::CLINIC->value;
-        $clinicTitleKey = SoapResponseKey::CLINIC_TITLE->value;
-        $clinicUidKey   = SoapResponseKey::CLINIC_UID->value;
+        $clinicTitleKey = SoapResponseKey::TITLE->value;
+        $clinicUidKey   = SoapResponseKey::UID_RU->value;
 
         $clinics = [];
-        if (is_array($xmlArr[$clinicKey]))
+        if (key_exists($clinicKey, $xmlArr) && is_array($xmlArr[$clinicKey]))
         {
             if (Utils::is_assoc($xmlArr[$clinicKey]))
             {
@@ -92,40 +93,50 @@ class XmlParser
         $oneServiceKey   = SoapResponseKey::MAIN_SERVICE->value;
         $durationKey     = SoapResponseKey::DURATION->value;
         $ratingKey       = SoapResponseKey::RATING->value;
+        $serviceUidKey   = SoapResponseKey::UID_EN->value;
 
         $employees = [];
-        if (is_array($xmlArr[$employeeKey]))
+        if (key_exists($employeeKey, $xmlArr) && is_array($xmlArr[$employeeKey]))
         {
             foreach ($xmlArr[$employeeKey] as $item)
             {
+                if (!is_array($item) || empty($item))
+                {
+                    continue;
+                }
+
                 $employee = [];
-                $clinicUid = ($item[$organizationKey] == "00000000-0000-0000-0000-000000000000") ? "" : $item[$organizationKey];
+                $clinicUid = ($item[$organizationKey] == SoapResponseKey::EMPTY_UID->value) ? '' : $item[$organizationKey];
                 $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
 
-                $specialtyName = !empty($item[$specialtyKey]) ? $item[$specialtyKey] : SoapResponseKey::EMPTY_SPECIALTY->value;
+                $specialtyName = key_exists($specialtyKey, $item) && !empty($item[$specialtyKey])
+                                 ? (string)$item[$specialtyKey]
+                                 : SoapResponseKey::EMPTY_SPECIALTY->value;
                 $specialtyUid  = $this->getSpecialtyUid($specialtyName);
 
                 $employee['uid']          = $uid;
-                $employee['name']         = $item[$nameKey];
-                $employee['surname']      = $item[$lastNameKey];
-                $employee['middleName']   = $item[$middleNameKey];
-                $employee['fullName']     = $item[$lastNameKey] ." ". $item[$nameKey] ." ". $item[$middleNameKey];
+                $employee['name']         = key_exists($nameKey, $item) ? $item[$nameKey] : '';
+                $employee['surname']      = key_exists($lastNameKey, $item) ? $item[$lastNameKey] : '';
+                $employee['middleName']   = key_exists($middleNameKey, $item) ? $item[$middleNameKey] : '';
+                $employee['fullName']     = $employee['surname'] ." ". $employee['name'] ." ". $employee['middleName'];
                 $employee['clinicUid']    = $clinicUid;
-                $employee['photo']        = $item[$photoKey];
-                $employee['description']  = !empty($item[$descriptionKey]) ? $item[$descriptionKey] : '';
-                $employee['rating']       = $item[$ratingKey];
+                $employee['photo']        = key_exists($photoKey, $item) ? $item[$photoKey] : '';
+                $employee['description']  = key_exists($descriptionKey, $item) && !empty($item[$descriptionKey])
+                                            ? $item[$descriptionKey] : '';
+                $employee['rating']       = key_exists($ratingKey, $item) ? $item[$ratingKey] : '';
                 $employee['specialtyName']= $specialtyName;
                 $employee['specialtyUid'] = $specialtyUid;
                 $employee['services']     = [];
 
-                if (is_array($item[$servicesKey][$oneServiceKey]))
-                {
+                if (key_exists($servicesKey, $item) && is_array($item[$servicesKey])
+                    && key_exists($oneServiceKey, $item[$servicesKey]) && is_array($item[$servicesKey][$oneServiceKey])
+                ){
                     foreach ($item[$servicesKey][$oneServiceKey] as $service)
                     {
-                        if (!empty($service['UID']))
+                        if (is_array($service) && key_exists($serviceUidKey, $service) && !empty($service[$serviceUidKey]))
                         {
-                            $employee['services'][$service['UID']] = [
-                                'uid'              => $service['UID'],
+                            $employee['services'][$service[$serviceUidKey]] = [
+                                'uid'              => $service[$serviceUidKey],
                                 'personalDuration' => strtotime($service[$durationKey])-strtotime('0001-01-01T00:00:00')
                             ];
                         }
@@ -147,22 +158,22 @@ class XmlParser
     {
         $xmlArr = $this->xmlToArray($xml);
 
-        $catalogKey     = "Каталог";
-        $isFolderKey    = "ЭтоПапка";
-        $titleKey       = "Наименование";
-        $typeKey        = "Вид";
-        $artNumberKey   = "Артикул";
-        $priceKey       = "Цена";
-        $durationKey    = "Продолжительность";
-        $measureUnitKey = "БазоваяЕдиницаИзмерения";
-        $parent         = "Родитель";
+        $catalogKey     = SoapResponseKey::CATALOG->value;
+        $isFolderKey    = SoapResponseKey::IS_FOLDER->value;
+        $titleKey       = SoapResponseKey::TITLE->value;
+        $typeKey        = SoapResponseKey::TYPE->value;
+        $artNumberKey   = SoapResponseKey::ART_NUMBER->value;
+        $priceKey       = SoapResponseKey::PRICE->value;
+        $durationKey    = SoapResponseKey::DURATION->value;
+        $measureUnitKey = SoapResponseKey::MEASURE_UNIT->value;
+        $parent         = SoapResponseKey::PARENT->value;
 
         $nomenclature = [];
-        if (is_array($xmlArr[$catalogKey]))
+        if (key_exists($catalogKey, $xmlArr) && is_array($xmlArr[$catalogKey]))
         {
             foreach ($xmlArr[$catalogKey] as $item)
             {
-                if ($item[$isFolderKey] === true){
+                if (!is_array($item) || empty($item) || ($item[$isFolderKey] === true)){
                     continue;
                 }
                 $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
@@ -190,15 +201,15 @@ class XmlParser
     public function prepareScheduleData(SimpleXMLElement $xml): array
     {
         $xmlArr           = $this->xmlToArray($xml);
-        $scheduleKey      = 'ГрафикДляСайта';
-        $scheduleErrorKey = 'ОшибкаПараметров';
+        $scheduleKey      = SoapResponseKey::SCHEDULE->value;
+        $scheduleErrorKey = SoapResponseKey::SCHEDULE_ERROR->value;
 
-        if (array_key_exists($scheduleErrorKey, $xmlArr)){
+        if (key_exists($scheduleErrorKey, $xmlArr)){
             throw new Exception((string)$xmlArr[$scheduleErrorKey]);
         }
 
         $schedule = [];
-        if (is_array($xmlArr[$scheduleKey])){
+        if (key_exists($scheduleKey, $xmlArr) && is_array($xmlArr[$scheduleKey])){
             $schedule = $this->processScheduleData($xmlArr[$scheduleKey]);
         }
         return $schedule;
@@ -215,15 +226,15 @@ class XmlParser
             $schedule = [$schedule];
         }
 
-        $employeeUidKey       = "СотрудникID";
-        $employeeFullNameKey  = "СотрудникФИО";
-        $scheduleDurationKey  = "ДлительностьПриема";
-        $schedulePeriodsKey   = "ПериодыГрафика";
-        $scheduleOnePeriodKey = "ПериодГрафика";
-        $scheduleFreeTimeKey  = "СвободноеВремя";
-        $scheduleBusyTimeKey  = "ЗанятоеВремя";
-        $specialtyKey         = "Специализация";
-        $clinicKey            = "Клиника";
+        $employeeUidKey       = SoapResponseKey::EMPLOYEE_UID->value;
+        $employeeFullNameKey  = SoapResponseKey::EMPLOYEE_FULL_NAME->value;
+        $scheduleDurationKey  = SoapResponseKey::SCHEDULE_DURATION->value;
+        $schedulePeriodsKey   = SoapResponseKey::SCHEDULE_PERIODS->value;
+        $scheduleOnePeriodKey = SoapResponseKey::SCHEDULE_PERIOD->value;
+        $scheduleFreeTimeKey  = SoapResponseKey::SCHEDULE_FREE_TIME->value;
+        $scheduleBusyTimeKey  = SoapResponseKey::SCHEDULE_BUSY_TIME->value;
+        $specialtyKey         = SoapResponseKey::SPECIALTY->value;
+        $clinicKey            = SoapResponseKey::CLINIC->value;
 
         $formattedSchedule = [];
         foreach ($schedule as $item)
@@ -250,7 +261,7 @@ class XmlParser
                     $employeeUid     = $item[$employeeUidKey];
                     $employeeName    = $item[$employeeFullNameKey];
 
-                    $durationSeconds = 1800;//default duration = 30min
+                    $durationSeconds = Parameters::DEFAULT_DURATION;
                     $durationFrom1C  = '';
                     if (!empty($item[$scheduleDurationKey]))
                     {
@@ -329,9 +340,9 @@ class XmlParser
             $array = [$array];
         }
 
-        $scheduleDateKey  = "Дата";
-        $scheduleStartKey = "ВремяНачала";
-        $scheduleEndKey   = "ВремяОкончания";
+        $scheduleDateKey  = SoapResponseKey::SCHEDULE_DATE_TIME->value;
+        $scheduleStartKey = SoapResponseKey::SCHEDULE_START_TIME->value;
+        $scheduleEndKey   = SoapResponseKey::SCHEDULE_END_TIME->value;
 
         $formattedArray = [];
         foreach ($array as $item)
@@ -386,8 +397,8 @@ class XmlParser
      */
     public function formatTimeTableItem(array $item, int $start, int $end): array
     {
-        $scheduleDateKey     = "Дата";
-        $scheduleTimeTypeKey = "ВидВремени";
+        $scheduleDateKey     = SoapResponseKey::SCHEDULE_DATE_TIME->value;
+        $scheduleTimeTypeKey = SoapResponseKey::SCHEDULE_TYPE_OF_TIME->value;
 
         return [
             "typeOfTimeUid" => !empty($item[$scheduleTimeTypeKey]) ? $item[$scheduleTimeTypeKey] : '',
@@ -409,18 +420,27 @@ class XmlParser
     {
         $xmlArr = $this->xmlToArray($xml);
 
-        $commonResKey        = 'Результат';
-        $commonErrDescKey    = 'ОписаниеОшибки';
-        $commonBookingUidKey = 'УИД';
+        $commonResKey        = SoapResponseKey::COMMON_RESULT->value;
+        $commonErrDescKey    = SoapResponseKey::COMMON_ERROR->value;
+        $commonBookingUidKey = SoapResponseKey::UID_RU->value;
 
-        if ($xmlArr[$commonResKey] === "true" && !empty($xmlArr[$commonBookingUidKey]))
-        {
+        if (key_exists($commonResKey, $xmlArr) && key_exists($commonBookingUidKey, $xmlArr)
+            && $xmlArr[$commonResKey] === "true" && !empty($xmlArr[$commonBookingUidKey])
+        ){
             return [
                 'uid'  => $xmlArr[$commonBookingUidKey]
             ];
         }
-        else {
-            throw new Exception((string)$xmlArr[$commonErrDescKey]);
+        else
+        {
+            if (key_exists($commonErrDescKey, $xmlArr))
+            {
+                throw new Exception((string)$xmlArr[$commonErrDescKey]);
+            }
+            else
+            {
+                throw new Exception('Unexpected response from 1C - ' . json_encode($xmlArr));
+            }
         }
     }
 
@@ -433,8 +453,8 @@ class XmlParser
     public function prepareCommonResultData(SimpleXMLElement $xml): array
     {
         $xmlArr = $this->xmlToArray($xml);
-        $commonResKey     = "Результат";
-        $commonErrDescKey = "ОписаниеОшибки";
+        $commonResKey     = SoapResponseKey::COMMON_RESULT->value;
+        $commonErrDescKey = SoapResponseKey::COMMON_ERROR->value;
 
         if ($xmlArr[$commonResKey] === "true"){
             return ['success' => true];
@@ -453,10 +473,10 @@ class XmlParser
     {
         $xmlArr = $this->xmlToArray($xml);
 
-        $commonResKey       = "Результат";
-        $commonResDescKey   = "ОписаниеРезультата";
-        $commonErrDescKey   = "ОписаниеОшибки";
-        $reservedStatusText = "Забронирована";
+        $commonResKey       = SoapResponseKey::COMMON_RESULT->value;
+        $commonResDescKey   = SoapResponseKey::COMMON_RESULT_DESCRIPTION->value;
+        $commonErrDescKey   = SoapResponseKey::COMMON_ERROR->value;
+        $reservedStatusText = SoapResponseKey::STATUS_BOOKED->value;
 
         if ((int)$xmlArr[$commonResKey] > 0)
         {
@@ -464,8 +484,8 @@ class XmlParser
             $statusTitle = ((int)$statusCode === 9) ? $reservedStatusText : $xmlArr[$commonResDescKey];
 
             return [
-                'statusId'  => $xmlArr[$commonResKey],
-                'status'    => (is_array($statusTitle)) ? implode("; ", $statusTitle) : $statusTitle,
+                'statusId'    => $xmlArr[$commonResKey],
+                'statusTitle' => (is_array($statusTitle)) ? implode("; ", $statusTitle) : $statusTitle,
             ];
         }
         else {

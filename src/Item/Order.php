@@ -37,6 +37,25 @@ class Order implements IAdaptableItem
     private string $serviceDuration;
     private array  $services;
 
+    /**
+     * Order constructor
+     * @param string $specialtyName
+     * @param string $date
+     * @param string $timeBegin
+     * @param string $employeeUid
+     * @param string $clinicUid
+     * @param string $name
+     * @param string $lastName
+     * @param string $secondName
+     * @param string $phone
+     * @param string $email
+     * @param string $address
+     * @param string $comment
+     * @param string $orderUid
+     * @param string $clientBirthday
+     * @param string $serviceDuration
+     * @param array $services
+     */
     public function __construct(
         string $specialtyName,  string $date,  string $timeBegin, string $employeeUid,
         string $clinicUid,      string $name,  string $lastName,  string $secondName,
