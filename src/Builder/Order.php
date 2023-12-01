@@ -28,31 +28,31 @@ class Order implements IBuilder
     const RESERVE_MODE   = 'RESERVE';
     const ORDER_MODE     = 'ORDER';
 
-    private string $mode;
+    protected string $mode;
 
-    private string $specialtyName   = '';
-    private string $date            = '';
-    private string $timeBegin       = '';
-    private string $employeeUid     = '';
-    private string $clinicUid       = '';
-    private string $name            = '';
-    private string $lastName        = '';
-    private string $secondName      = '';
-    private string $phone           = '';
-    private string $email           = '';
-    private string $address         = '';
-    private string $comment         = '';
-    private string $orderUid        = '';
-    private string $clientBirthday  = '';
-    private string $serviceDuration = '';
-    private array  $services        = [];
+    protected string $specialtyName   = '';
+    protected string $date            = '';
+    protected string $timeBegin       = '';
+    protected string $employeeUid     = '';
+    protected string $clinicUid       = '';
+    protected string $name            = '';
+    protected string $lastName        = '';
+    protected string $secondName      = '';
+    protected string $phone           = '';
+    protected string $email           = '';
+    protected string $address         = '';
+    protected string $comment         = '';
+    protected string $orderUid        = '';
+    protected string $clientBirthday  = '';
+    protected string $serviceDuration = '';
+    protected array  $services        = [];
 
-    private array $requiredReserveParams  = [ 'date', 'timeBegin', 'employeeUid', 'clinicUid' ];
-    private array $requiredWaitListParams = [
+    protected array $requiredReserveParams  = [ 'date', 'timeBegin', 'employeeUid', 'clinicUid' ];
+    protected array $requiredWaitListParams = [
         'date', 'timeBegin', 'clinicUid',
         'name', 'lastName', 'secondName',  'phone'
     ];
-    private array $requiredOrderParams = [
+    protected array $requiredOrderParams = [
         'date', 'timeBegin', 'clinicUid', 'employeeUid',
         'name', 'lastName', 'secondName',  'phone'
     ];

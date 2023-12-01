@@ -38,22 +38,22 @@ class Order
      * @param array $services
      */
     public function __construct(
-        private readonly string $specialtyName,
-        private readonly string $date,
-        private readonly string $timeBegin,
-        private readonly string $employeeUid,
-        private readonly string $clinicUid,
-        private readonly string $name,
-        private readonly string $lastName,
-        private readonly string $secondName,
-        private readonly string $phone,
-        private readonly string $email,
-        private readonly string $address,
-        private readonly string $comment,
-        private readonly string $orderUid,
-        private readonly string $clientBirthday,
-        private readonly string $serviceDuration,
-        private readonly array $services
+        protected readonly string $specialtyName,
+        protected readonly string $date,
+        protected readonly string $timeBegin,
+        protected readonly string $employeeUid,
+        protected readonly string $clinicUid,
+        protected readonly string $name,
+        protected readonly string $lastName,
+        protected readonly string $secondName,
+        protected readonly string $phone,
+        protected readonly string $email,
+        protected readonly string $address,
+        protected readonly string $comment,
+        protected readonly string $orderUid,
+        protected readonly string $clientBirthday,
+        protected readonly string $serviceDuration,
+        protected readonly array $services
     ){
     }
 

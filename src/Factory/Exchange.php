@@ -24,7 +24,7 @@ use ANZ\BitUmc\SDK\Service\Exchange\Soap;
  */
 class Exchange implements IFactory
 {
-    private IClient $client;
+    protected IClient $client;
 
     /**
      * Exchange constructor
