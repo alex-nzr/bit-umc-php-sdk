@@ -28,9 +28,9 @@ use SimpleXMLElement;
  */
 class SoapClient extends \SoapClient implements IClient
 {
-    private ClientScope $scope;
-    //private string $login = '';
-    //private string $password = '';
+    protected ClientScope $scope;
+    //protected string $login = '';
+    //protected string $password = '';
 
     /**
      * SoapClient constructor closed. Use method create() instead
@@ -181,7 +181,7 @@ class SoapClient extends \SoapClient implements IClient
      * @return array
      * @throws \Exception
      */
-    private function handleXML(string $method, SimpleXMLElement $xml): array
+    protected function handleXML(string $method, SimpleXMLElement $xml): array
     {
         $parser = new XmlParser();
         return match ($method) {

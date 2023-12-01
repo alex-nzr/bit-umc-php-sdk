@@ -26,12 +26,12 @@ use Exception;
  */
 class ExchangeClient implements IBuilder
 {
-    private ?string $login = null;
-    private ?string $password = null;
-    private ?Protocol $publicationProtocol = null;
-    private ?string $publicationAddress = null;
-    private ?string $baseName = null;
-    private ?ClientScope $scope = null;
+    protected ?string $login = null;
+    protected ?string $password = null;
+    protected ?Protocol $publicationProtocol = null;
+    protected ?string $publicationAddress = null;
+    protected ?string $baseName = null;
+    protected ?ClientScope $scope = null;
 
     /**
      * @return static
