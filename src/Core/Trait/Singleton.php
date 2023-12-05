@@ -18,12 +18,12 @@ namespace ANZ\BitUmc\SDK\Core\Trait;
  */
 trait Singleton
 {
-    protected static ?object $instance = null;
+    protected static mixed $instance = null;
 
     /**
-     * @return object
+     * @return static
      */
-    public static function getInstance(): object
+    public static function getInstance(): static
     {
         if (empty(static::$instance))
         {
@@ -31,6 +31,8 @@ trait Singleton
         }
         return static::$instance;
     }
+
+    protected function __construct(){}
 
     /**
      * @return void
