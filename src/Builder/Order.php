@@ -354,9 +354,6 @@ class Order implements IBuilder
         if (empty($this->serviceDuration)){
             $this->serviceDuration = '';
         }
-        if (empty($this->serviceUid)){
-            $this->serviceUid = '';
-        }
         if (empty($this->orderUid)){
             $this->orderUid = '';
         }
