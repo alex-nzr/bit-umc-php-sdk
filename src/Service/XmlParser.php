@@ -40,29 +40,25 @@ class XmlParser
     public function prepareClinicData(SimpleXMLElement $xml): array
     {
         $xmlArr = $this->xmlToArray($xml);
-
-        $clinicKey      = SoapResponseKey::CLINIC->value;
-        $clinicTitleKey = SoapResponseKey::TITLE->value;
-        $clinicUidKey   = SoapResponseKey::UID_RU->value;
+        $clinicKey = SoapResponseKey::CLINIC->value;
 
         $clinics = [];
         if (key_exists($clinicKey, $xmlArr) && is_array($xmlArr[$clinicKey]))
         {
-            if (!array_is_list($xmlArr[$clinicKey]))
+            $clinicsData = $xmlArr[$clinicKey];
+            if (!array_is_list($clinicsData))
             {
-                $clinics[$xmlArr[$clinicKey][$clinicUidKey]] = [
-                    'uid' => $xmlArr[$clinicKey][$clinicUidKey],
-                    'name' => $xmlArr[$clinicKey][$clinicTitleKey]
-                ];
+                $clinicsData = [$clinicsData];
             }
-            else
+
+            foreach ($clinicsData as $item)
             {
-                foreach ($xmlArr[$clinicKey] as $item) {
-                    $clinic = [];
-                    $clinic['uid'] = $item[$clinicUidKey];
-                    $clinic['name'] = $item[$clinicTitleKey];
-                    $clinics[$item[$clinicUidKey]] = $clinic;
+                if (!is_array($item) || empty($item))
+                {
+                    continue;
                 }
+                $clinic = $this->buildClinicData($item);
+                $clinics[$clinic['uid']] = $clinic;
             }
         }
         return $clinics;
@@ -81,23 +77,20 @@ class XmlParser
         $employees = [];
         if (key_exists($employeeKey, $xmlArr) && is_array($xmlArr[$employeeKey]))
         {
-            if (!array_is_list($xmlArr[$employeeKey]))
+            $employeesData = $xmlArr[$employeeKey];
+            if (!array_is_list($employeesData))
             {
-                $employee = $this->buildEmployeeData($xmlArr[$employeeKey]);
-                $employees[$employee['uid']] = $employee;
+                $employeesData = [$employeesData];
             }
-            else
-            {
-                foreach ($xmlArr[$employeeKey] as $item)
-                {
-                    if (!is_array($item) || empty($item))
-                    {
-                        continue;
-                    }
 
-                    $employee = $this->buildEmployeeData($item);
-                    $employees[$employee['uid']] = $employee;
+            foreach ($employeesData as $item)
+            {
+                if (!is_array($item) || empty($item))
+                {
+                    continue;
                 }
+                $employee = $this->buildEmployeeData($item);
+                $employees[$employee['uid']] = $employee;
             }
         }
 
@@ -118,21 +111,19 @@ class XmlParser
         $nomenclature = [];
         if (key_exists($catalogKey, $xmlArr) && is_array($xmlArr[$catalogKey]))
         {
-            if (!array_is_list($xmlArr[$catalogKey]))
+            $nomenclatureData = $xmlArr[$catalogKey];
+            if (!array_is_list($nomenclatureData))
             {
-                $product = $this->buildProductData($xmlArr[$catalogKey]);
-                $nomenclature[$product['uid']] = $product;
+                $nomenclatureData = [$nomenclatureData];
             }
-            else
+
+            foreach ($nomenclatureData as $item)
             {
-                foreach ($xmlArr[$catalogKey] as $item)
-                {
-                    if (!is_array($item) || empty($item) || ($item[$isFolderKey] === true)){
-                        continue;
-                    }
-                    $product = $this->buildProductData($item);
-                    $nomenclature[$product['uid']] = $product;
+                if (!is_array($item) || empty($item) || ($item[$isFolderKey] === true)){
+                    continue;
                 }
+                $product = $this->buildProductData($item);
+                $nomenclature[$product['uid']] = $product;
             }
         }
         return $nomenclature;
@@ -449,6 +440,21 @@ class XmlParser
 
     /**
      * @param array $item
+     * @return string[]
+     */
+    protected function buildClinicData(array $item): array
+    {
+        $clinicTitleKey = SoapResponseKey::TITLE->value;
+        $clinicUidKey   = SoapResponseKey::UID_RU->value;
+
+        return [
+            'uid' => $this->prepareTextFieldValue($item[$clinicUidKey]),
+            'name' => $this->prepareTextFieldValue($item[$clinicTitleKey])
+        ];
+    }
+
+    /**
+     * @param array $item
      * @return array
      */
     protected function buildEmployeeData(array $item): array
@@ -469,23 +475,27 @@ class XmlParser
         $employee = [];
 
         $clinicUid = ($item[$organizationKey] == SoapResponseKey::EMPTY_UID->value) ? '' : $item[$organizationKey];
-        $uid = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
+        $uid = is_array($item['UID']) ? (string)current($item['UID']) : (string)$item['UID'];
 
         $specialtyName = key_exists($specialtyKey, $item) && !empty($item[$specialtyKey])
-            ? (string)$item[$specialtyKey]
+            ? $this->prepareTextFieldValue($item[$specialtyKey])
             : SoapResponseKey::EMPTY_SPECIALTY->value;
         $specialtyUid  = $this->getSpecialtyUid($specialtyName);
 
+        $name = key_exists($nameKey, $item) ? $this->prepareTextFieldValue($item[$nameKey]) : '';
+        $surname = key_exists($lastNameKey, $item) ? $this->prepareTextFieldValue($item[$lastNameKey]) : '';
+        $middleName = key_exists($middleNameKey, $item) ? $this->prepareTextFieldValue($item[$middleNameKey]) : '';
+
         $employee['uid']          = $uid;
-        $employee['name']         = key_exists($nameKey, $item) ? $item[$nameKey] : '';
-        $employee['surname']      = key_exists($lastNameKey, $item) ? $item[$lastNameKey] : '';
-        $employee['middleName']   = key_exists($middleNameKey, $item) ? $item[$middleNameKey] : '';
-        $employee['fullName']     = $employee['surname'] ." ". $employee['name'] ." ". $employee['middleName'];
+        $employee['name']         = $name;
+        $employee['surname']      = $surname;
+        $employee['middleName']   = $middleName;
+        $employee['fullName']     = $surname ." ". $name ." ". $middleName;
         $employee['clinicUid']    = $clinicUid;
-        $employee['photo']        = key_exists($photoKey, $item) ? $item[$photoKey] : '';
+        $employee['photo']        = key_exists($photoKey, $item) ? $this->prepareTextFieldValue($item[$photoKey]) : '';
         $employee['description']  = key_exists($descriptionKey, $item) && !empty($item[$descriptionKey])
-            ? $item[$descriptionKey] : '';
-        $employee['rating']       = key_exists($ratingKey, $item) ? $item[$ratingKey] : '';
+                                    ? $this->prepareTextFieldValue($item[$descriptionKey]) : '';
+        $employee['rating']       = key_exists($ratingKey, $item) ? $this->prepareTextFieldValue($item[$ratingKey]) : '';
         $employee['specialtyName']= $specialtyName;
         $employee['specialtyUid'] = $specialtyUid;
         $employee['services']     = [];
@@ -523,15 +533,35 @@ class XmlParser
 
         $product = [];
 
-        $product['uid']         = is_array($item['UID']) ? current($item['UID']) : $item['UID'];
-        $product['name']        = $item[$titleKey];
-        $product['typeOfItem']  = $item[$typeKey];
+        $product['uid']         = is_array($item['UID']) ? (string)current($item['UID']) : (string)$item['UID'];
+        $product['name']        = $this->prepareTextFieldValue($item[$titleKey]);
+        $product['typeOfItem']  = $this->prepareTextFieldValue($item[$typeKey]);
         $product['artNumber']   = !empty($item[$artNumberKey]) ? $item[$artNumberKey] : '';
-        $product['price']       = str_replace("[^0-9]", '', $item[$priceKey]);
+        $product['price']       = str_replace("[^0-9]", '', $this->prepareTextFieldValue($item[$priceKey]));
         $product['duration']    = DateFormatter::formatDurationFromIsoToSeconds($item[$durationKey]);
-        $product['measureUnit'] = !empty($item[$measureUnitKey]) ? $item[$measureUnitKey] : '';
-        $product['parent']      = $item[$parent];
+        $product['measureUnit'] = !empty($item[$measureUnitKey]) ? $this->prepareTextFieldValue($item[$measureUnitKey]) : '';
+        $product['parent']      = $this->prepareTextFieldValue($item[$parent]);
 
         return $product;
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    protected function prepareTextFieldValue(mixed $value): string
+    {
+        //Иногда текстовые поля из 1с обернуты в массив
+        if (is_array($value) && !empty($value))
+        {
+            $value = (string)current($value);
+        }
+
+        if (empty($value) || !is_string($value))
+        {
+            return '';
+        }
+
+        return $value;
     }
 }
