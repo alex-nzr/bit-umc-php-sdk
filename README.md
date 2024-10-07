@@ -1,16 +1,5 @@
 # SDK по работе с SOAP-API 1C БИТ.УМЦ
 
-<span style="color:orange;font-size:20px;font-weight:600">ВАЖНО:
-С версии 1.1 отсутствует совместимость с php 7.4. 
-Минимальная версия php - 8.1.</span>
-
-<span style="color:orange;font-size:18px;font-weight:600">Также были 
-изменены некоторые неймспейсы, названия классов и методов.
-После обновления потребуется небольшой рефакторинг.</span>
-
-<span style="color:orange;font-size:18px;font-weight:600">Версия 1.0 
-доступна в [этой ветке](https://github.com/alex-nzr/bit-umc-php-sdk/tree/version1.0).</span>
-
 ## Требования:
 `PHP >= 8.1`
 
@@ -25,7 +14,7 @@
 Добавить пакет в зависимости `composer.json`:
 ```
 {
-    "require":{"alex-nzr/bit-umc-sdk":"dev-master"}
+    "require":{"alex-nzr/bit-umc-sdk":"*"}
 }
 ```
 
@@ -35,7 +24,7 @@ $ php composer.phar install
 ```
 или
 ```
-composer require alex-nzr/bit-umc-sdk:dev-master
+composer require alex-nzr/bit-umc-sdk
 ```
 
 ### Скачать исходники
