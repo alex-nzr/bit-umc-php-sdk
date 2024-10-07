@@ -24,7 +24,7 @@ $ php composer.phar install
 ```
 или
 ```
-composer require alex-nzr/bit-umc-sdk
+composer require alex-nzr/bit-umc-sdk 
 ```
 
 ### Скачать исходники
