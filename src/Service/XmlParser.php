@@ -503,6 +503,11 @@ class XmlParser
         if (key_exists($servicesKey, $item) && is_array($item[$servicesKey])
             && key_exists($oneServiceKey, $item[$servicesKey]) && is_array($item[$servicesKey][$oneServiceKey])
         ){
+            if (!array_is_list($item[$servicesKey][$oneServiceKey]))
+            {
+                $item[$servicesKey][$oneServiceKey] = [$item[$servicesKey][$oneServiceKey]];
+            }
+
             foreach ($item[$servicesKey][$oneServiceKey] as $service)
             {
                 if (is_array($service) && key_exists($serviceUidKey, $service) && !empty($service[$serviceUidKey]))
