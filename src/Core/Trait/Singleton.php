@@ -1,35 +1,23 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 04.08.2022
  * ==================================================
- * bit-umc-php-sdk - Singleton.php
- * 04.08.2022 00:34
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Core\Trait;
 
-/**
- * Trait Singleton
- * @package ANZ\BitUmc\SDK\Core\Trait
- */
 trait Singleton
 {
-    protected static mixed $instance = null;
+    protected static array $instances = [];
 
-    /**
-     * @return static
-     */
-    public static function getInstance(): static
+    public static function getInstance()
     {
-        if (empty(static::$instance))
+        if (!key_exists(static::class, static::$instances) || !(static::$instances[static::class] instanceof static))
         {
-            static::$instance = new static();
+            static::$instances[static::class] = new static();
         }
-        return static::$instance;
+        return static::$instances[static::class];
     }
 
     protected function __construct(){}

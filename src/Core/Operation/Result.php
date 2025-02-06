@@ -1,23 +1,14 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 05.08.2022
  * ==================================================
- * bit-umc-php-sdk - Result.php
- * 05.08.2022 21:41
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Core\Operation;
 
 use Throwable;
 
-/**
- * Class Result
- * @package ANZ\BitUmc\SDK\Core\Operation
- */
 class Result
 {
     protected bool $isSuccess;

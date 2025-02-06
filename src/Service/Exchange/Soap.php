@@ -1,14 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2023
+ * This file is part of project bit-umc-php-sdk
+ * 28.11.2023
  * ==================================================
- * bit-umc-php-sdk - Soap.php
- * 28.11.2023 22:54
- * ==================================================
- */
+*/
 namespace ANZ\BitUmc\SDK\Service\Exchange;
 
 use ANZ\BitUmc\SDK\Core\Model\Request\Soap\BookAnAppointmentWithParams;
@@ -24,10 +20,6 @@ use ANZ\BitUmc\SDK\Core\Model\Request\Soap\GetSchedule20;
 use ANZ\BitUmc\SDK\Item\Order;
 use DateTime;
 
-/**
- * @class Soap
- * @package ANZ\BitUmc\SDK\Service\Exchange
- */
 class Soap extends Base
 {
     /**

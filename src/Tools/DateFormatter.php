@@ -1,23 +1,14 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 10.08.2022
  * ==================================================
- * bit-umc-php-sdk - DateTime.php
- * 10.08.2022 00:30
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Tools;
 
 use DateTime;
 
-/**
- * Class DateTime
- * @package ANZ\BitUmc\SDK\Tools
- */
 class DateFormatter
 {
     /**

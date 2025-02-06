@@ -1,14 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 04.08.2022
  * ==================================================
- * bit-umc-php-sdk - Common.php
- * 04.08.2022 01:16
- * ==================================================
- */
+*/
 namespace ANZ\BitUmc\SDK\Service\Exchange;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
@@ -16,10 +12,6 @@ use ANZ\BitUmc\SDK\Core\Contract\Service\IExchangeService;
 use ANZ\BitUmc\SDK\Core\Contract\Model\IRequestModel;
 use ANZ\BitUmc\SDK\Core\Operation\Result;
 
-/**
- * Class Common
- * @package ANZ\BitUmc\SDK\Service\OneC
- */
 abstract class Base implements IExchangeService
 {
     protected IClient $client;

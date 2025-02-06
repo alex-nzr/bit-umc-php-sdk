@@ -1,15 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 04.08.2022
  * ==================================================
- * bit-umc-php-sdk - XmlParser.php
- * 04.08.2022 22:08
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Service;
 
 use ANZ\BitUmc\SDK\Core\Config\Parameters;
@@ -18,10 +13,6 @@ use ANZ\BitUmc\SDK\Tools\DateFormatter;
 use Exception;
 use SimpleXMLElement;
 
-/**
- * @class XmlParser
- * @package ANZ\BitUmc\SDK\Service
- */
 class XmlParser
 {
     /**

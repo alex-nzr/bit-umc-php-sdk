@@ -1,21 +1,12 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2023
+ * This file is part of project bit-umc-php-sdk
+ * 28.11.2023
  * ==================================================
- * bit-umc-php-sdk - SoapResponseKey.php
- * 28.11.2023 23:49
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Core\Dictionary;
 
-/**
- * @enum SoapResponseKey
- * @package ANZ\BitUmc\SDK\Core\Dictionary
- */
 enum SoapResponseKey: string
 {
     case EMPTY_SPECIALTY = 'Без основной специализации';

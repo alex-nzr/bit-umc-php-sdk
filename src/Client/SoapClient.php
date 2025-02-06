@@ -1,15 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 05.08.2022
  * ==================================================
- * bit-umc-php-sdk - SoapClient.php
- * 05.08.2022 21:10
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Client;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
@@ -22,10 +17,6 @@ use ANZ\BitUmc\SDK\Service\XmlParser;
 use Exception;
 use SimpleXMLElement;
 
-/**
- * Class SoapClient
- * @package ANZ\BitUmc\SDK\Core\Soap
- */
 class SoapClient extends \SoapClient implements IClient
 {
     protected ClientScope $scope;
@@ -130,6 +121,10 @@ class SoapClient extends \SoapClient implements IClient
         try
         {
             $method = $requestModel->getRequestMethod();
+            if (!method_exists($this, $method))
+            {
+                throw new Exception("Method {$method} does not exist in class " . $this::class);
+            }
             $response = $this->$method($requestModel);
 
             if (is_object($response) && property_exists($response, 'return'))
@@ -148,7 +143,7 @@ class SoapClient extends \SoapClient implements IClient
                     try
                     {
                         //The xml structure in the response calls warnings.
-                        //There is no way to influence the structure, so warnings is hidden.
+                        //There is no way to influence the structure, so warnings are hidden.
                         $xml = @(new SimpleXMLElement($response->return));
                     }
                     catch (Exception $e)
@@ -165,7 +160,7 @@ class SoapClient extends \SoapClient implements IClient
             }
             else
             {
-                throw new Exception("Unexpected format of response returned from 1C");
+                throw new Exception('Unexpected format of response returned from 1C');
             }
         }
         catch (Exception $e)

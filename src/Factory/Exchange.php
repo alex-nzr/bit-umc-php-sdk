@@ -1,15 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 04.08.2022
  * ==================================================
- * bit-umc-php-sdk - Exchange.php
- * 04.08.2022 01:28
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Factory;
 
 use ANZ\BitUmc\SDK\Core\Contract\Connection\IClient;
@@ -18,10 +13,6 @@ use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
 use ANZ\BitUmc\SDK\Service\Exchange\Http;
 use ANZ\BitUmc\SDK\Service\Exchange\Soap;
 
-/**
- * @class ServiceFactory
- * @package ANZ\BitUmc\SDK\Factory
- */
 class Exchange implements IFactory
 {
     protected IClient $client;

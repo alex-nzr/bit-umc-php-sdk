@@ -1,15 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 10.08.2022
  * ==================================================
- * bit-umc-php-sdk - Order.php
- * 10.08.2022 22:27
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Builder;
 
 use ANZ\BitUmc\SDK\Core\Contract\IBuilder;
@@ -18,10 +13,6 @@ use ANZ\BitUmc\SDK\Tools\DateFormatter;
 use DateTime;
 use Exception;
 
-/**
- * Class Order
- * @package ANZ\BitUmc\SDK\Service\Builder
- */
 class Order implements IBuilder
 {
     const WAIT_LIST_MODE = 'WAIT_LIST';

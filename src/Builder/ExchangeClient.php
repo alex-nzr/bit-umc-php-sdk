@@ -1,15 +1,10 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 06.08.2022
  * ==================================================
- * bit-umc-php-sdk - ExchangeClient.php
- * 06.08.2022 21:52
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Builder;
 
 use ANZ\BitUmc\SDK\Client\HttpClient;
@@ -20,10 +15,6 @@ use ANZ\BitUmc\SDK\Core\Dictionary\ClientScope;
 use ANZ\BitUmc\SDK\Core\Dictionary\Protocol;
 use Exception;
 
-/**
- * @class ExchangeClient
- * @package ANZ\BitUmc\SDK\Builder
- */
 class ExchangeClient implements IBuilder
 {
     protected ?string $login = null;

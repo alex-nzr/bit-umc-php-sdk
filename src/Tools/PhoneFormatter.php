@@ -1,21 +1,12 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2022
+ * This file is part of project bit-umc-php-sdk
+ * 04.08.2022
  * ==================================================
- * bit-umc-php-sdk - PhoneFormatter.php
- * 04.08.2022 22:31
- * ==================================================
- */
-
+*/
 namespace ANZ\BitUmc\SDK\Tools;
 
-/**
- * Class PhoneFormatter
- * @package ANZ\BitUmc\SDK\Tools
- */
 class PhoneFormatter
 {
     /**

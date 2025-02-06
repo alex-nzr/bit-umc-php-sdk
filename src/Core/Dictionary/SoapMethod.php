@@ -1,20 +1,12 @@
 <?php
-/**
+/*
  * ==================================================
- * Developer: Alexey Nazarov
- * E-mail: jc1988x@gmail.com
- * Copyright (c) 2019 - 2023
+ * This file is part of project bit-umc-php-sdk
+ * 26.11.2023
  * ==================================================
- * bit-umc-php-sdk - SoapMethod.php
- * 26.11.2023 18:44
- * ==================================================
- */
+*/
 namespace ANZ\BitUmc\SDK\Core\Dictionary;
 
-/**
- * @enum SoapMethod
- * @package ANZ\BitUmc\SDK\Core\Dictionary
- */
 enum SoapMethod: string
 {
     case CLINIC_ACTION_1C           = "GetListClinic";
