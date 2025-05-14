@@ -94,27 +94,24 @@ class XmlParser
      */
     public function prepareNomenclatureData(SimpleXMLElement $xml): array
     {
-        $xmlArr = $this->xmlToArray($xml);
-
+        $uidEnKey       = SoapResponseKey::UID_EN->value;;
         $catalogKey     = SoapResponseKey::CATALOG->value;
         $isFolderKey    = SoapResponseKey::IS_FOLDER->value;
 
         $nomenclature = [];
-        if (key_exists($catalogKey, $xmlArr) && is_array($xmlArr[$catalogKey]))
+        if (property_exists($xml, $catalogKey))
         {
-            $nomenclatureData = $xmlArr[$catalogKey];
-            if (!array_is_list($nomenclatureData))
+            foreach (property_exists($uidEnKey, $xml->$catalogKey) ? [$xml->$catalogKey] : $xml->$catalogKey as $item)
             {
-                $nomenclatureData = [$nomenclatureData];
-            }
-
-            foreach ($nomenclatureData as $item)
-            {
-                if (!is_array($item) || empty($item) || ($item[$isFolderKey] === true)){
+                $item = $this->xmlToArray($item);
+                if (empty($item) || ($item[$isFolderKey] === 'true') || ($item[$isFolderKey] === true))
+                {
                     continue;
                 }
                 $product = $this->buildProductData($item);
                 $nomenclature[$product['uid']] = $product;
+                unset($item);
+                unset($product);
             }
         }
         return $nomenclature;
@@ -259,7 +256,7 @@ class XmlParser
             return [];
         }
 
-        if (!$duration > 0){
+        if ($duration <= 0){
             $duration = 1800;
         }
 
