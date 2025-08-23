@@ -121,10 +121,6 @@ class SoapClient extends \SoapClient implements IClient
         try
         {
             $method = $requestModel->getRequestMethod();
-            if (!method_exists($this, $method))
-            {
-                throw new Exception("Method {$method} does not exist in class " . $this::class);
-            }
             $response = $this->$method($requestModel);
 
             if (is_object($response) && property_exists($response, 'return'))
