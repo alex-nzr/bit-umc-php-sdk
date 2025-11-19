@@ -25,13 +25,17 @@ class XmlParser
     }
 
     /**
-     * @param \SimpleXMLElement $xml
-     * @return array
+     * @throws \Exception
      */
     public function prepareClinicData(SimpleXMLElement $xml): array
     {
         $xmlArr = $this->xmlToArray($xml);
         $clinicKey = SoapResponseKey::CLINIC->value;
+        $commonErrDescKey    = SoapResponseKey::COMMON_ERROR->value;
+        if (key_exists($commonErrDescKey, $xmlArr))
+        {
+            throw new Exception((string)$xmlArr[$commonErrDescKey]);
+        }
 
         $clinics = [];
         if (key_exists($clinicKey, $xmlArr) && is_array($xmlArr[$clinicKey]))
@@ -56,14 +60,18 @@ class XmlParser
     }
 
     /**
-     * @param \SimpleXMLElement $xml
-     * @return array
+     * @throws \Exception
      */
     public function prepareEmployeesData(SimpleXMLElement $xml): array
     {
         $xmlArr = $this->xmlToArray($xml);
 
         $employeeKey = SoapResponseKey::EMPLOYEE->value;
+        $commonErrDescKey    = SoapResponseKey::COMMON_ERROR->value;
+        if (key_exists($commonErrDescKey, $xmlArr))
+        {
+            throw new Exception((string)$xmlArr[$commonErrDescKey]);
+        }
 
         $employees = [];
         if (key_exists($employeeKey, $xmlArr) && is_array($xmlArr[$employeeKey]))
@@ -89,15 +97,20 @@ class XmlParser
     }
 
     /**
-     * @param \SimpleXMLElement $xml
-     * @return array
+     * @throws \Exception
      */
     public function prepareNomenclatureData(SimpleXMLElement $xml): array
     {
         $uidEnKey       = SoapResponseKey::UID_EN->value;;
         $catalogKey     = SoapResponseKey::CATALOG->value;
         $isFolderKey    = SoapResponseKey::IS_FOLDER->value;
+        $commonResKey   = SoapResponseKey::COMMON_RESULT->value;
+        $commonErrDescKey = SoapResponseKey::COMMON_ERROR->value;
 
+        if (property_exists($xml, $commonResKey) && property_exists($xml, $commonErrDescKey))
+        {
+            throw new Exception((string)$xml->$commonErrDescKey);
+        }
         $nomenclature = [];
         if (property_exists($xml, $catalogKey))
         {
@@ -127,6 +140,12 @@ class XmlParser
         $xmlArr           = $this->xmlToArray($xml);
         $scheduleKey      = SoapResponseKey::SCHEDULE->value;
         $scheduleErrorKey = SoapResponseKey::SCHEDULE_ERROR->value;
+        $commonErrDescKey    = SoapResponseKey::COMMON_ERROR->value;
+
+        if (key_exists($commonErrDescKey, $xmlArr))
+        {
+            throw new Exception((string)$xmlArr[$commonErrDescKey]);
+        }
 
         if (key_exists($scheduleErrorKey, $xmlArr)){
             throw new Exception((string)$xmlArr[$scheduleErrorKey]);
