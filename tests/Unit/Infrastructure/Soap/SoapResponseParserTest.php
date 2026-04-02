@@ -14,14 +14,14 @@ final class SoapResponseParserTest extends TestCase
 {
     public function testReturnsSuccessForPlainOkResponse(): void
     {
-        $response = (object) ['return' => 'Ok'];
+        $response = (object) ['return' => FixtureHelper::read('tests/Fixtures/soap/common/ok.txt')];
 
         self::assertSame(['success' => true], (new SoapResponseParser())->parse(SoapMethod::CREATE_APPOINTMENT, $response));
     }
 
     public function testThrowsRemoteServiceExceptionForPlainErrorResponse(): void
     {
-        $response = (object) ['return' => FixtureHelper::read('tests/Fixtures/soap/common/plain-error.txt')];
+        $response = (object) ['return' => FixtureHelper::read('tests/Fixtures/soap/common/error.txt')];
 
         $this->expectException(RemoteServiceException::class);
         (new SoapResponseParser())->parse(SoapMethod::CREATE_APPOINTMENT, $response);

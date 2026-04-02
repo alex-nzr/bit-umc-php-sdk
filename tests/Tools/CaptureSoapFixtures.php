@@ -187,6 +187,7 @@ $directAppointmentRequest = new BookAppointmentRequest(
 $appointmentOp = $mapper->sendAppointment($directAppointmentRequest);
 $appointmentResponse = call_raw($soapClient, $appointmentOp->method->value, $appointmentOp->payload);
 save_fixture('tests/Fixtures/soap/common/appointment-success.xml', extract_return_string($appointmentResponse));
+save_fixture('tests/Fixtures/soap/common/ok.txt', extract_return_string($appointmentResponse));
 $responseParser->parse($appointmentOp->method, $appointmentResponse);
 
 $reserveRequest = new ReserveRequest(
@@ -260,9 +261,9 @@ try {
 try {
     $badStatusOp = $mapper->getAppointmentStatus('00000000-0000-0000-0000-000000000001');
     $badStatusResponse = call_raw($soapClient, $badStatusOp->method->value, $badStatusOp->payload);
-    save_fixture('tests/Fixtures/soap/status/error-description.xml', extract_return_string($badStatusResponse));
+    save_fixture('tests/Fixtures/soap/status/error-description.txt', extract_return_string($badStatusResponse));
 } catch (Throwable $exception) {
-    save_fixture('tests/Fixtures/soap/status/error-description.xml', '');
+    save_fixture('tests/Fixtures/soap/status/error-description.txt', '');
 }
 
 save_fixture('tests/Fixtures/soap/metadata.json', json_encode([

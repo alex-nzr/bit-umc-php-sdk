@@ -298,7 +298,7 @@ vendor/bin/phpunit --testsuite integration
 
 Important:
 - integration tests assume that the target test base contains data similar to the fixtures used when they were written
-- they currently oriented on clinic `Центральная клиника`, doctor `Барбышева` and service `Первичная консультация офтальмолога`
+- they are currently oriented on clinic `Центральная клиника`, doctor `Барбышева` and service `Первичная консультация офтальмолога`
 - on another base those exact entities may not exist, so tests that check for them may fail even if transport and parsing work correctly
 - generic transport-negative tests can still be reused on any base
 
