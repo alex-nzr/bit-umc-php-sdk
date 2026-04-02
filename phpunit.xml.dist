@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="true" cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="BIT_UMC_TEST_PROTOCOL" value="HTTP"/>
+        <env name="BIT_UMC_TEST_HOST" value=""/>
+        <env name="BIT_UMC_TEST_BASE_NAME" value=""/>
+        <env name="BIT_UMC_TEST_LOGIN" value=""/>
+        <env name="BIT_UMC_TEST_PASSWORD" value=""/>
+        <env name="BIT_UMC_RUN_INTEGRATION_TESTS" value="0"/>
+    </php>
+</phpunit>

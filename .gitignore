@@ -10,3 +10,4 @@
 /.idea/
 /log/
 /.osp/
+/.phpunit.cache/test-results
