@@ -37,7 +37,8 @@ final class SoapRequestMapper
         $payload = new stdClass();
         $startDate = $query->startDate ?? new DateTimeImmutable('tomorrow');
         $payload->StartDate = $this->formatDateTime($startDate);
-        $payload->FinishDate = DateFormatter::formatTimestampToISO($startDate->getTimestamp() + ($query->days * 86400));
+        $finishDate = DateTimeImmutable::createFromInterface($startDate)->modify('+' . $query->days . ' days');
+        $payload->FinishDate = $this->formatDateTime($finishDate);
         $payload->Params = [];
 
         if ($query->clinicUid !== '') {
