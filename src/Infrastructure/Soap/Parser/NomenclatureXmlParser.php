@@ -6,6 +6,18 @@ use XMLReader;
 
 final class NomenclatureXmlParser extends AbstractSoapXmlParser
 {
+    private const KNOWN_KEYS = [
+        'UID',
+        'Наименование',
+        'Вид',
+        'Артикул',
+        'Цена',
+        'Продолжительность',
+        'БазоваяЕдиницаИзмерения',
+        'Родитель',
+        'ЭтоПапка',
+    ];
+
     public function parse(string $xml): array
     {
         $reader = $this->elementReader->createReader($xml);
@@ -42,7 +54,7 @@ final class NomenclatureXmlParser extends AbstractSoapXmlParser
                 continue;
             }
 
-            $items[$uid] = [
+            $items[$uid] = $this->attachExtraFields([
                 'uid' => $uid,
                 'name' => $this->stringValue($item['Наименование'] ?? ''),
                 'typeOfItem' => $this->stringValue($item['Вид'] ?? ''),
@@ -51,7 +63,7 @@ final class NomenclatureXmlParser extends AbstractSoapXmlParser
                 'duration' => $this->parseIsoDurationToSeconds($this->stringValue($item['Продолжительность'] ?? '')),
                 'measureUnit' => $this->stringValue($item['БазоваяЕдиницаИзмерения'] ?? ''),
                 'parent' => $this->stringValue($item['Родитель'] ?? ''),
-            ];
+            ], $item, self::KNOWN_KEYS);
             unset($item);
         }
 

@@ -4,6 +4,24 @@ namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Parser;
 
 final class EmployeesXmlParser extends AbstractSoapXmlParser
 {
+    private const KNOWN_KEYS = [
+        'UID',
+        'Имя',
+        'Фамилия',
+        'Отчество',
+        'Специализация',
+        'Организация',
+        'Фото',
+        'КраткоеОписание',
+        'СреднийРейтинг',
+        'ОсновныеУслуги',
+    ];
+
+    private const SERVICE_KNOWN_KEYS = [
+        'UID',
+        'Продолжительность',
+    ];
+
     public function parse(string $xml): array
     {
         $reader = $this->elementReader->createReader($xml);
@@ -65,13 +83,13 @@ final class EmployeesXmlParser extends AbstractSoapXmlParser
                     continue;
                 }
 
-                $employee['services'][$serviceUid] = [
+                $employee['services'][$serviceUid] = $this->attachExtraFields([
                     'uid' => $serviceUid,
                     'personalDuration' => $this->parseIsoDurationToSeconds($this->stringValue($service['Продолжительность'] ?? '')),
-                ];
+                ], $service, self::SERVICE_KNOWN_KEYS);
             }
 
-            $employees[$uid] = $employee;
+            $employees[$uid] = $this->attachExtraFields($employee, $item, self::KNOWN_KEYS);
             unset($item, $employee);
         }
 

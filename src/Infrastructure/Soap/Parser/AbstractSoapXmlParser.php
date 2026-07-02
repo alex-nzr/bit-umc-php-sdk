@@ -35,6 +35,18 @@ abstract class AbstractSoapXmlParser
         return is_array($value) && array_is_list($value) ? $value : [$value];
     }
 
+    protected function extractExtraFields(array $source, array $knownKeys): array
+    {
+        return array_diff_key($source, array_flip($knownKeys));
+    }
+
+    protected function attachExtraFields(array $normalized, array $source, array $knownKeys): array
+    {
+        $normalized['_extra'] = $this->extractExtraFields($source, $knownKeys);
+
+        return $normalized;
+    }
+
     protected function failIfErrorMessage(string $message): void
     {
         if ($message !== '') {

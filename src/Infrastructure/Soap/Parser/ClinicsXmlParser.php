@@ -4,6 +4,11 @@ namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Parser;
 
 final class ClinicsXmlParser extends AbstractSoapXmlParser
 {
+    private const KNOWN_KEYS = [
+        'УИД',
+        'Наименование',
+    ];
+
     public function parse(string $xml): array
     {
         $reader = $this->elementReader->createReader($xml);
@@ -34,10 +39,10 @@ final class ClinicsXmlParser extends AbstractSoapXmlParser
                 continue;
             }
 
-            $clinics[$uid] = [
+            $clinics[$uid] = $this->attachExtraFields([
                 'uid' => $uid,
                 'name' => $this->stringValue($item['Наименование'] ?? ''),
-            ];
+            ], $item, self::KNOWN_KEYS);
         }
 
         $reader->close();

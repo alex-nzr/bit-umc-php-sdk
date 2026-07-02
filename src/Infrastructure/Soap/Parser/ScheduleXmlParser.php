@@ -5,6 +5,21 @@ namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Parser;
 final class ScheduleXmlParser extends AbstractSoapXmlParser
 {
     private const DEFAULT_DURATION = 1800;
+    private const KNOWN_KEYS = [
+        'Клиника',
+        'СотрудникФИО',
+        'СотрудникID',
+        'Специализация',
+        'ПериодыГрафика',
+        'ДлительностьПриема',
+    ];
+    private const PERIOD_KNOWN_KEYS = [
+        'Клиника',
+        'Дата',
+        'ВремяНачала',
+        'ВремяОкончания',
+        'ВидВремени',
+    ];
 
     public function parse(string $xml): array
     {
@@ -53,7 +68,7 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
             $durationSeconds = $durationFrom1C !== '' ? $this->parseIsoDurationToSeconds($durationFrom1C) : self::DEFAULT_DURATION;
 
             if (!isset($schedule[$clinicUid][$specialtyUid][$employeeUid])) {
-                $schedule[$clinicUid][$specialtyUid][$employeeUid] = [
+                $schedule[$clinicUid][$specialtyUid][$employeeUid] = $this->attachExtraFields([
                     'specialtyName' => $specialtyName,
                     'employeeName' => $this->stringValue($item['СотрудникФИО'] ?? ''),
                     'durationFrom1C' => $durationFrom1C,
@@ -63,7 +78,7 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
                         'busy' => [],
                         'free' => [],
                     ],
-                ];
+                ], $item, self::KNOWN_KEYS);
             }
 
             $periods = is_array($item['ПериодыГрафика'] ?? null) ? $item['ПериодыГрафика'] : [];
@@ -154,6 +169,7 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
             'formattedDate' => date('d-m-Y', strtotime($date)),
             'formattedTimeBegin' => date('H:i', $start),
             'formattedTimeEnd' => date('H:i', $end),
+            '_extra' => $this->extractExtraFields($item, self::PERIOD_KNOWN_KEYS),
         ];
     }
 }
