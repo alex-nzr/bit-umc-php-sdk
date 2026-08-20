@@ -11,11 +11,16 @@ final class ClinicsXmlParser extends AbstractSoapXmlParser
 
     public function parse(string $xml): array
     {
+        return iterator_to_array($this->iterate($xml));
+    }
+
+    public function iterate(string $xml): \Generator
+    {
         $reader = $this->elementReader->createReader($xml);
-        $clinics = [];
         $errorMessage = '';
 
-        while ($reader->read()) {
+        try {
+            while ($reader->read()) {
             if ($reader->nodeType !== \XMLReader::ELEMENT) {
                 continue;
             }
@@ -39,15 +44,14 @@ final class ClinicsXmlParser extends AbstractSoapXmlParser
                 continue;
             }
 
-            $clinics[$uid] = $this->attachExtraFields([
+            yield $uid => $this->attachExtraFields([
                 'uid' => $uid,
                 'name' => $this->stringValue($item['Наименование'] ?? ''),
             ], $item, self::KNOWN_KEYS);
+            }
+        } finally {
+            $reader->close();
         }
-
-        $reader->close();
         $this->failIfErrorMessage($errorMessage);
-
-        return $clinics;
     }
 }

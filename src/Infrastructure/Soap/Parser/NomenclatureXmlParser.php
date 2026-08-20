@@ -20,12 +20,17 @@ final class NomenclatureXmlParser extends AbstractSoapXmlParser
 
     public function parse(string $xml): array
     {
+        return iterator_to_array($this->iterate($xml));
+    }
+
+    public function iterate(string $xml): \Generator
+    {
         $reader = $this->elementReader->createReader($xml);
-        $items = [];
         $errorMessage = '';
         $resultValue = null;
 
-        while ($reader->read()) {
+        try {
+            while ($reader->read()) {
             if ($reader->nodeType !== XMLReader::ELEMENT) {
                 continue;
             }
@@ -54,7 +59,7 @@ final class NomenclatureXmlParser extends AbstractSoapXmlParser
                 continue;
             }
 
-            $items[$uid] = $this->attachExtraFields([
+            yield $uid => $this->attachExtraFields([
                 'uid' => $uid,
                 'name' => $this->stringValue($item['Наименование'] ?? ''),
                 'typeOfItem' => $this->stringValue($item['Вид'] ?? ''),
@@ -65,15 +70,14 @@ final class NomenclatureXmlParser extends AbstractSoapXmlParser
                 'parent' => $this->stringValue($item['Родитель'] ?? ''),
             ], $item, self::KNOWN_KEYS);
             unset($item);
+            }
+        } finally {
+            $reader->close();
         }
-
-        $reader->close();
 
         if ($resultValue !== null && !$this->isTruthy($resultValue)) {
             $this->failIfErrorMessage($errorMessage);
         }
-
-        return $items;
     }
 
     private function parseIsoDurationToSeconds(string $value): int

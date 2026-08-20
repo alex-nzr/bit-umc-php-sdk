@@ -11,3 +11,5 @@
 /log/
 /.osp/
 /.phpunit.cache/test-results
+/.ai
+/AGENTS.md

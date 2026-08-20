@@ -13,6 +13,18 @@ use ANZ\BitUmc\SDK\Infrastructure\Soap\Parser\ScheduleXmlParser;
 
 final class SoapResponseParser
 {
+    public function iterate(SoapMethod $method, mixed $response): \Generator
+    {
+        $payload = $this->getXmlPayload($method, $response);
+
+        yield from match ($method) {
+            SoapMethod::GET_CLINICS => (new ClinicsXmlParser())->iterate($payload),
+            SoapMethod::GET_EMPLOYEES => (new EmployeesXmlParser())->iterate($payload),
+            SoapMethod::GET_NOMENCLATURE => (new NomenclatureXmlParser())->iterate($payload),
+            default => throw new ResponseParseException(sprintf('SOAP method %s does not return an iterable collection.', $method->value)),
+        };
+    }
+
     public function parse(SoapMethod $method, mixed $response): array
     {
         if (!is_object($response) || !property_exists($response, 'return')) {
@@ -52,5 +64,27 @@ final class SoapResponseParser
             SoapMethod::DELETE_APPOINTMENT => (new CommonResultXmlParser())->parse($payload),
             SoapMethod::GET_APPOINTMENT_STATUS => (new AppointmentStatusXmlParser())->parse($payload),
         };
+    }
+
+    private function getXmlPayload(SoapMethod $method, mixed $response): string
+    {
+        if (!is_object($response) || !property_exists($response, 'return') || !is_string($response->return)) {
+            throw new ResponseParseException('Unexpected SOAP payload type returned from 1C.');
+        }
+
+        $payload = $response->return;
+        $payloadLength = strlen($payload);
+        for ($index = 0; $index < $payloadLength; $index++) {
+            $character = $payload[$index];
+            if (!ctype_space($character)) {
+                if ($character === '<') {
+                    return $index === 0 ? $payload : substr($payload, $index);
+                }
+
+                break;
+            }
+        }
+
+        throw new ResponseParseException(sprintf('SOAP method %s did not return an XML collection payload.', $method->value));
     }
 }

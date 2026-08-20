@@ -41,14 +41,29 @@ final class BitUmcClient
         return $this->dispatch($this->soapRequestMapper->getClinics());
     }
 
+    public function iterateClinics(): \Generator
+    {
+        yield from $this->dispatchIterable($this->soapRequestMapper->getClinics());
+    }
+
     public function getEmployees(): array
     {
         return $this->dispatch($this->soapRequestMapper->getEmployees());
     }
 
+    public function iterateEmployees(): \Generator
+    {
+        yield from $this->dispatchIterable($this->soapRequestMapper->getEmployees());
+    }
+
     public function getNomenclature(string $clinicUid): array
     {
         return $this->dispatch($this->soapRequestMapper->getNomenclature($clinicUid));
+    }
+
+    public function iterateNomenclature(string $clinicUid): \Generator
+    {
+        yield from $this->dispatchIterable($this->soapRequestMapper->getNomenclature($clinicUid));
     }
 
     public function getSchedule(?ScheduleQuery $query = null): array
@@ -86,5 +101,12 @@ final class BitUmcClient
         $response = $this->soapTransport->execute($operation);
 
         return $this->soapResponseParser->parse($operation->method, $response);
+    }
+
+    private function dispatchIterable(SoapOperation $operation): \Generator
+    {
+        $response = $this->soapTransport->execute($operation);
+
+        yield from $this->soapResponseParser->iterate($operation->method, $response);
     }
 }

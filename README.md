@@ -1,25 +1,24 @@
-# SDK for 1C BIT.UMC
+# SDK для 1С-БИТ.УМЦ
 
-## Requirements
+## Требования
 - PHP >= 8.1
 - ext-soap
 - ext-json
 - ext-xmlreader
 
-## Version 2 API
-The SDK is built around a single public entry point: `ANZ\\BitUmc\\SDK\\BitUmcClient`.
+## API версии 2
+SDK построен вокруг единой публичной точки входа: `ANZ\\BitUmc\\SDK\\BitUmcClient`.
 
-### Principles
-- Credentials and access data are passed at runtime.
-- The SDK does not read `.env`, ini files or databases.
-- Transport type is selected explicitly through `TransportType`.
-- SOAP is implemented now.
-- HTTP transport is reserved in the architecture for the next stage.
-- SOAP XML responses are parsed through `XMLReader` to reduce peak memory usage on large payloads.
-- Successful calls return normalized arrays.
-- Failures throw typed exceptions from `ANZ\\BitUmc\\SDK\\Domain\\Exception`.
+### Принципы
+- Учётные данные передаются во время выполнения.
+- SDK не читает `.env`, ini-файлы и базы данных.
+- Тип транспорта явно выбирается через `TransportType`.
+- Сейчас реализован SOAP; HTTP-транспорт зарезервирован для следующего этапа.
+- XML-ответы SOAP разбираются через `XMLReader`, чтобы уменьшить пиковое потребление памяти.
+- Успешные вызовы возвращают нормализованные массивы.
+- Ошибки выбрасывают типизированные исключения из `ANZ\\BitUmc\\SDK\\Domain\\Exception`.
 
-## Usage
+## Использование
 ```php
 use ANZ\BitUmc\SDK\BitUmcClient;
 use ANZ\BitUmc\SDK\Transport\Auth\BasicAuth;
@@ -39,7 +38,7 @@ $client = new BitUmcClient(
 );
 ```
 
-## Available operations
+## Доступные операции
 ```php
 $client->getClinics();
 $client->getEmployees();
@@ -52,15 +51,27 @@ $client->sendAppointment($bookAppointmentRequest);
 $client->deleteAppointment($appointmentUid);
 ```
 
-## Request DTOs
+## Большие коллекции
+
+Методы `getClinics()`, `getEmployees()` и `getNomenclature()` для обратной совместимости продолжают возвращать полные массивы. Приложения, которым не нужно хранить всю большую коллекцию, могут использовать соответствующий итератор:
+
+```php
+foreach ($client->iterateEmployees() as $employeeUid => $employee) {
+    $repository->save($employeeUid, $employee);
+}
+```
+
+Доступны `iterateClinics()`, `iterateEmployees()` и `iterateNomenclature(string $clinicUid)`. Они возвращают те же нормализованные элементы и ключи UID, но не накапливают результирующий массив внутри SDK. Сам SOAP-ответ пока всё ещё получается `SoapClient` как строка; потоковый транспорт будет отдельной оптимизацией. Исключения итераторов возникают при начале обхода.
+
+## DTO запросов
 - `ANZ\\BitUmc\\SDK\\Domain\\Request\\ScheduleQuery`
 - `ANZ\\BitUmc\\SDK\\Domain\\Request\\ReserveRequest`
 - `ANZ\\BitUmc\\SDK\\Domain\\Request\\WaitListRequest`
 - `ANZ\\BitUmc\\SDK\\Domain\\Request\\BookAppointmentRequest`
 
-See [examples/index.php](examples/index.php) for a complete example.
+Полный пример приведён в [examples/index.php](examples/index.php).
 
-## Returned data
+## Возвращаемые данные
 
 ### `getClinics(): array`
 ```php
@@ -194,7 +205,7 @@ See [examples/index.php](examples/index.php) for a complete example.
 ]
 ```
 
-## Error handling
+## Обработка ошибок
 ```php
 use ANZ\BitUmc\SDK\Domain\Exception\BitUmcException;
 
@@ -205,66 +216,54 @@ try {
 }
 ```
 
-## Tests
+## Тесты
 
-### What is covered
-Current test suite covers these cases.
+### Что покрыто
+Текущий набор тестов покрывает следующие случаи.
 
-Unit and fixture-based tests:
-- endpoint resolution
-- request mapping for schedule, appointment status and appointment creation
-- parsing of clinics
-- parsing of employees and employee services
-- parsing of nomenclature
-- parsing of schedule
-- parsing of common result payloads
-- parsing of appointment status payloads
-- SOAP response handling for:
+Unit-тесты с fixtures:
+- разрешение endpoint;
+- маппинг запросов расписания, статуса и создания записи;
+- разбор клиник, сотрудников, услуг, расписания и статусов;
+- обработка SOAP-ответов:
   - `Ok`
   - `Error`
   - plain text error responses
   - XML responses with `ОписаниеОшибки`
 
-Live integration tests:
+Интеграционные тесты с реальной 1С:
 - `getClinics()`
 - `getEmployees()`
-- search for `Центральная клиника`
-- search for doctor `Барбышева`
-- `getNomenclature()` for the central clinic with lookup of `Первичная консультация офтальмолога`
+- поиск `Центральная клиника`;
+- поиск врача `Барбышева`;
+- `getNomenclature()` для центральной клиники с поиском `Первичная консультация офтальмолога`;
 - `sendReserve()` -> `getAppointmentStatus()` -> `deleteAppointment()`
 - `sendWaitList()`
 - `sendAppointment()`
-- negative transport cases:
-  - wrong base name
-  - wrong web-service name
+- негативные сценарии транспорта: неверное имя базы и web-сервиса.
 
-### How unit tests work
-Unit tests do not connect to 1C.
-They work on local fixtures from `tests/Fixtures/soap`.
-These fixtures are raw XML or raw text responses captured from a real 1C test instance.
+### Как работают unit-тесты
+Unit-тесты не подключаются к 1С. Они используют локальные fixtures из `tests/Fixtures/soap`: необработанные XML и текстовые ответы, полученные из тестового экземпляра 1С.
 
-This means:
-- unit tests are deterministic and fast
-- parser behaviour is checked against real responses, not synthetic examples
-- you do not need any runtime credentials to run unit tests
+Это означает, что тесты детерминированы и быстры, поведение парсера проверяется на реальных ответах, а учётные данные не требуются.
 
-Run unit tests:
+Запуск unit-тестов:
 ```bash
 vendor/bin/phpunit --testsuite unit
 ```
 
-### How to refresh fixtures from a real 1C instance
-Fixture capture script:
+### Как обновить fixtures из реальной 1С
+Скрипт получения fixtures:
 - [CaptureSoapFixtures.php](tests/Tools/CaptureSoapFixtures.php)
 
-Before running it, set environment variables:
+Перед запуском задайте переменные окружения:
 - `BIT_UMC_TEST_PROTOCOL` = `HTTP` or `HTTPS`
 - `BIT_UMC_TEST_HOST`
 - `BIT_UMC_TEST_BASE_NAME`
 - `BIT_UMC_TEST_LOGIN`
 - `BIT_UMC_TEST_PASSWORD`
 
-Example PowerShell:
+Пример для PowerShell:
 ```powershell
 $env:BIT_UMC_TEST_PROTOCOL='HTTP'
 $env:BIT_UMC_TEST_HOST='example.com'
@@ -274,10 +273,10 @@ $env:BIT_UMC_TEST_PASSWORD='password'
 php tests/Tools/CaptureSoapFixtures.php
 ```
 
-### How to run integration tests against a real 1C instance
-Integration tests use live network calls and require env variables.
+### Как запустить интеграционные тесты против реальной 1С
+Интеграционные тесты выполняют сетевые вызовы и требуют переменных окружения.
 
-Supported env variables:
+Поддерживаемые переменные:
 - `BIT_UMC_RUN_INTEGRATION_TESTS=1`
 - `BIT_UMC_TEST_PROTOCOL=HTTP` or `HTTPS`
 - `BIT_UMC_TEST_HOST`
@@ -296,11 +295,11 @@ $env:BIT_UMC_TEST_PASSWORD='password'
 vendor/bin/phpunit --testsuite integration
 ```
 
-Important:
-- integration tests assume that the target test base contains data similar to the fixtures used when they were written
-- they are currently oriented on clinic `Центральная клиника`, doctor `Барбышева` and service `Первичная консультация офтальмолога`
-- on another base those exact entities may not exist, so tests that check for them may fail even if transport and parsing work correctly
-- generic transport-negative tests can still be reused on any base
+Важно:
+- интеграционные тесты предполагают, что в целевой базе есть данные, похожие на использованные fixtures;
+- сейчас они ориентированы на клинику `Центральная клиника`, врача `Барбышева` и услугу `Первичная консультация офтальмолога`;
+- в другой базе эти сущности могут отсутствовать, поэтому отдельные проверки могут завершиться ошибкой при исправных транспорте и парсинге;
+- общие негативные проверки транспорта применимы к любой базе.
 
-## Transport notes
-`ConnectionOptions` already reserves the `apiKey` field for the future HTTP transport. SOAP ignores this field.
+## Примечание о транспорте
+В `ConnectionOptions` поле `apiKey` уже зарезервировано для будущего HTTP-транспорта. SOAP его игнорирует.

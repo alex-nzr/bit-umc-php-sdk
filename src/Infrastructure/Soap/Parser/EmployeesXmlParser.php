@@ -24,11 +24,16 @@ final class EmployeesXmlParser extends AbstractSoapXmlParser
 
     public function parse(string $xml): array
     {
+        return iterator_to_array($this->iterate($xml));
+    }
+
+    public function iterate(string $xml): \Generator
+    {
         $reader = $this->elementReader->createReader($xml);
-        $employees = [];
         $errorMessage = '';
 
-        while ($reader->read()) {
+        try {
+            while ($reader->read()) {
             if ($reader->nodeType !== \XMLReader::ELEMENT) {
                 continue;
             }
@@ -89,14 +94,13 @@ final class EmployeesXmlParser extends AbstractSoapXmlParser
                 ], $service, self::SERVICE_KNOWN_KEYS);
             }
 
-            $employees[$uid] = $this->attachExtraFields($employee, $item, self::KNOWN_KEYS);
+            yield $uid => $this->attachExtraFields($employee, $item, self::KNOWN_KEYS);
             unset($item, $employee);
+            }
+        } finally {
+            $reader->close();
         }
-
-        $reader->close();
         $this->failIfErrorMessage($errorMessage);
-
-        return $employees;
     }
 
     private function normalizeClinicUid(mixed $value): string

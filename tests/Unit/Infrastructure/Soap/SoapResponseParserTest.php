@@ -42,4 +42,13 @@ final class SoapResponseParserTest extends TestCase
         $this->expectException(RemoteServiceException::class);
         (new SoapResponseParser())->parse(SoapMethod::DELETE_APPOINTMENT, $response);
     }
+
+    public function testIteratesCollectionPayloadWithLeadingWhitespace(): void
+    {
+        $response = (object) ['return' => "\n  " . FixtureHelper::read('tests/Fixtures/soap/clinics/success.xml')];
+
+        $result = iterator_to_array((new SoapResponseParser())->iterate(SoapMethod::GET_CLINICS, $response));
+
+        self::assertCount(3, $result);
+    }
 }
