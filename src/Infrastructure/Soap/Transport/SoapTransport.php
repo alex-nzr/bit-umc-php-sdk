@@ -1,9 +1,10 @@
 <?php
 
-namespace ANZ\BitUmc\SDK\Infrastructure\Soap;
+namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Transport;
 
 use ANZ\BitUmc\SDK\Domain\Exception\InvalidArgumentException;
 use ANZ\BitUmc\SDK\Domain\Exception\TransportException;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapOperation;
 use ANZ\BitUmc\SDK\Transport\ConnectionOptions;
 use ANZ\BitUmc\SDK\Transport\Endpoint\EndpointResolver;
 use SoapClient;

@@ -8,15 +8,18 @@ use ANZ\BitUmc\SDK\Domain\Request\ReserveRequest;
 use ANZ\BitUmc\SDK\Domain\Request\ScheduleQuery;
 use ANZ\BitUmc\SDK\Domain\Request\WaitListRequest;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapOperation;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapMethod;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapRequestMapper;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapResponseParser;
-use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapTransport;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\Transport\SoapTransport;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\Transport\StreamingSoapTransport;
 use ANZ\BitUmc\SDK\Transport\ConnectionOptions;
 use ANZ\BitUmc\SDK\Transport\TransportType;
 
 final class BitUmcClient
 {
     private readonly SoapTransport $soapTransport;
+    private readonly StreamingSoapTransport $streamingSoapTransport;
     private readonly SoapRequestMapper $soapRequestMapper;
     private readonly SoapResponseParser $soapResponseParser;
 
@@ -32,6 +35,7 @@ final class BitUmcClient
         }
 
         $this->soapTransport = new SoapTransport($this->options);
+        $this->streamingSoapTransport = new StreamingSoapTransport($this->options);
         $this->soapRequestMapper = new SoapRequestMapper();
         $this->soapResponseParser = new SoapResponseParser();
     }
@@ -71,6 +75,11 @@ final class BitUmcClient
         return $this->dispatch($this->soapRequestMapper->getSchedule($query ?? new ScheduleQuery()));
     }
 
+    public function iterateSchedule(?ScheduleQuery $query = null): \Generator
+    {
+        yield from $this->dispatchIterable($this->soapRequestMapper->getSchedule($query ?? new ScheduleQuery()));
+    }
+
     public function getAppointmentStatus(string $appointmentUid): array
     {
         return $this->dispatch($this->soapRequestMapper->getAppointmentStatus($appointmentUid));
@@ -98,6 +107,10 @@ final class BitUmcClient
 
     private function dispatch(SoapOperation $operation): array
     {
+        if (in_array($operation->method, [SoapMethod::GET_CLINICS, SoapMethod::GET_EMPLOYEES, SoapMethod::GET_NOMENCLATURE, SoapMethod::GET_SCHEDULE], true)) {
+            return $this->soapResponseParser->parsePayload($operation->method, $this->streamingSoapTransport->execute($operation));
+        }
+
         $response = $this->soapTransport->execute($operation);
 
         return $this->soapResponseParser->parse($operation->method, $response);
@@ -105,8 +118,6 @@ final class BitUmcClient
 
     private function dispatchIterable(SoapOperation $operation): \Generator
     {
-        $response = $this->soapTransport->execute($operation);
-
-        yield from $this->soapResponseParser->iterate($operation->method, $response);
+        yield from $this->soapResponseParser->iteratePayload($operation->method, $this->streamingSoapTransport->execute($operation));
     }
 }

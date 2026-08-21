@@ -2,6 +2,9 @@
 
 namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Parser;
 
+use Generator;
+use XMLReader;
+
 final class EmployeesXmlParser extends AbstractSoapXmlParser
 {
     private const KNOWN_KEYS = [
@@ -27,14 +30,32 @@ final class EmployeesXmlParser extends AbstractSoapXmlParser
         return iterator_to_array($this->iterate($xml));
     }
 
-    public function iterate(string $xml): \Generator
+    public function iterate(string $xml): Generator
     {
         $reader = $this->elementReader->createReader($xml);
+
+        yield from $this->iterateReader($reader);
+    }
+
+    public function parseFile(string $path): array
+    {
+        return iterator_to_array($this->iterateFile($path));
+    }
+
+    public function iterateFile(string $path): Generator
+    {
+        $reader = $this->elementReader->createReaderFromFile($path);
+
+        yield from $this->iterateReader($reader);
+    }
+
+    private function iterateReader(XMLReader $reader): Generator
+    {
         $errorMessage = '';
 
         try {
             while ($reader->read()) {
-            if ($reader->nodeType !== \XMLReader::ELEMENT) {
+            if ($reader->nodeType !== XMLReader::ELEMENT) {
                 continue;
             }
 

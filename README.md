@@ -4,6 +4,8 @@
 - PHP >= 8.1
 - ext-soap
 - ext-json
+- ext-xml
+- ext-libxml
 - ext-xmlreader
 
 ## API версии 2
@@ -44,6 +46,10 @@ $client->getClinics();
 $client->getEmployees();
 $client->getNomenclature($clinicUid);
 $client->getSchedule($scheduleQuery);
+$client->iterateClinics();
+$client->iterateEmployees();
+$client->iterateNomenclature($clinicUid);
+$client->iterateSchedule($scheduleQuery);
 $client->getAppointmentStatus($appointmentUid);
 $client->sendReserve($reserveRequest);
 $client->sendWaitList($waitListRequest);
@@ -53,7 +59,7 @@ $client->deleteAppointment($appointmentUid);
 
 ## Большие коллекции
 
-Методы `getClinics()`, `getEmployees()` и `getNomenclature()` для обратной совместимости продолжают возвращать полные массивы. Приложения, которым не нужно хранить всю большую коллекцию, могут использовать соответствующий итератор:
+Методы `getClinics()`, `getEmployees()`, `getNomenclature()` и `getSchedule()` для обратной совместимости продолжают возвращать полные массивы. Приложения, которым не нужно хранить всю большую коллекцию, могут использовать соответствующий итератор:
 
 ```php
 foreach ($client->iterateEmployees() as $employeeUid => $employee) {
@@ -61,7 +67,62 @@ foreach ($client->iterateEmployees() as $employeeUid => $employee) {
 }
 ```
 
-Доступны `iterateClinics()`, `iterateEmployees()` и `iterateNomenclature(string $clinicUid)`. Они возвращают те же нормализованные элементы и ключи UID, но не накапливают результирующий массив внутри SDK. Сам SOAP-ответ пока всё ещё получается `SoapClient` как строка; потоковый транспорт будет отдельной оптимизацией. Исключения итераторов возникают при начале обхода.
+Доступны `iterateClinics()`, `iterateEmployees()`, `iterateNomenclature(string $clinicUid)` и `iterateSchedule(?ScheduleQuery $query = null)`.
+
+`iterateClinics()`, `iterateEmployees()` и `iterateNomenclature()` возвращают те же нормализованные элементы и ключи UID, что и соответствующие `get*()` методы, но не накапливают результирующий массив внутри SDK.
+
+`iterateSchedule()` возвращает записи расписания последовательно. Первая запись по сотруднику имеет `kind = employee` и содержит нормализованные данные сотрудника без периодов. Следующие записи имеют `kind = period`, `timeType = free|busy`, исходный интервал в `period` и разбитые свободные слоты в `formattedSlots`.
+
+```php
+foreach ($client->iterateSchedule($query) as $record) {
+    if ($record['kind'] !== 'period') {
+        continue;
+    }
+
+    $repository->saveSchedulePeriod($record);
+}
+```
+
+Форма записи `iterateSchedule()`:
+
+```php
+[
+    'kind' => 'period',
+    'clinicUid' => 'f679444a-22b7-11df-8618-002618dcef2c',
+    'specialtyUid' => '0j7rhngc0ldqu9gm0lzqvtc70l7qs9c40y8',
+    'employeeUid' => 'ac30e13a-3087-11dc-8594-005056c00008',
+    'employee' => [
+        'specialtyName' => 'Офтальмология',
+        'employeeName' => 'Барбышева Евгения Петровна',
+        'durationFrom1C' => '0001-01-01T00:15:00',
+        'durationInSeconds' => 900,
+        'timetable' => [
+            'freeFormatted' => [],
+            'busy' => [],
+            'free' => [],
+        ],
+        '_extra' => [],
+    ],
+    'timeType' => 'free',
+    'period' => [
+        '05-04-2026' => [
+            [
+                'typeOfTimeUid' => '624f2a40-5aa8-4f01-83f4-0f38535364bb',
+                'date' => '2026-04-05T00:00:00',
+                'timeBegin' => '2026-04-05T09:00:00',
+                'timeEnd' => '2026-04-05T09:30:00',
+                'formattedDate' => '05-04-2026',
+                'formattedTimeBegin' => '09:00',
+                'formattedTimeEnd' => '09:30',
+                '_extra' => [],
+            ],
+        ],
+    ],
+    'formattedSlots' => [],
+]
+```
+
+Крупные чтения `getClinics()`, `getEmployees()`, `getNomenclature()` и `getSchedule()` используют файловый streaming transport: SDK получает SOAP response через потоковый HTTP POST, извлекает `<return>` в временный payload-файл и разбирает его через `XMLReader`. `get*()` методы всё равно накапливают итоговый массив ради совместимости, а `iterate*()` методы позволяют обрабатывать элементы без накопления результата в SDK. Исключения итераторов возникают при начале обхода.
 
 ## DTO запросов
 - `ANZ\\BitUmc\\SDK\\Domain\\Request\\ScheduleQuery`
@@ -139,6 +200,8 @@ foreach ($client->iterateEmployees() as $employeeUid => $employee) {
 ```
 
 ### `getSchedule(?ScheduleQuery $query = null): array`
+Метод сохраняет прежний формат ответа и собирает итоговую карту поверх `iterateSchedule()`. Для больших расписаний это означает накопление итогового массива в памяти приложения.
+
 ```php
 [
     'f679444a-22b7-11df-8618-002618dcef2c' => [
@@ -303,3 +366,5 @@ vendor/bin/phpunit --testsuite integration
 
 ## Примечание о транспорте
 В `ConnectionOptions` поле `apiKey` уже зарезервировано для будущего HTTP-транспорта. SOAP его игнорирует.
+
+Параметр `responseMaxBytes` ограничивает размер полезной части SOAP-ответа для streaming transport. Значение по умолчанию: `536870912` байт.

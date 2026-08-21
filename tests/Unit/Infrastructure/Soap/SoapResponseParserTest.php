@@ -7,6 +7,7 @@ namespace ANZ\BitUmc\SDK\Tests\Unit\Infrastructure\Soap;
 use ANZ\BitUmc\SDK\Domain\Exception\RemoteServiceException;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapMethod;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapResponseParser;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\Transport\Stream\SoapPayload;
 use ANZ\BitUmc\SDK\Tests\FixtureHelper;
 use PHPUnit\Framework\TestCase;
 
@@ -50,5 +51,21 @@ final class SoapResponseParserTest extends TestCase
         $result = iterator_to_array((new SoapResponseParser())->iterate(SoapMethod::GET_CLINICS, $response));
 
         self::assertCount(3, $result);
+    }
+
+    public function testIteratesScheduleFilePayload(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'bit-umc-schedule-');
+        if ($path === false) {
+            self::fail('Unable to create temporary schedule payload.');
+        }
+
+        file_put_contents($path, FixtureHelper::read('tests/Fixtures/soap/schedule/success.xml'));
+        $payload = new SoapPayload($path);
+
+        $result = iterator_to_array((new SoapResponseParser())->iteratePayload(SoapMethod::GET_SCHEDULE, $payload));
+
+        self::assertNotEmpty($result);
+        self::assertSame('employee', $result[0]['kind']);
     }
 }

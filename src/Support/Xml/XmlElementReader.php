@@ -19,6 +19,18 @@ final class XmlElementReader
         return $reader;
     }
 
+    public function createReaderFromFile(string $path): XMLReader
+    {
+        $reader = new XMLReader();
+        $flags = LIBXML_NONET | LIBXML_COMPACT | LIBXML_PARSEHUGE | LIBXML_NOERROR | LIBXML_NOWARNING;
+
+        if (!$reader->open($path, null, $flags)) {
+            throw new ResponseParseException('Unable to initialize XMLReader for streamed SOAP response.');
+        }
+
+        return $reader;
+    }
+
     public function readCurrentElementValue(XMLReader $reader): mixed
     {
         if ($reader->nodeType !== XMLReader::ELEMENT) {

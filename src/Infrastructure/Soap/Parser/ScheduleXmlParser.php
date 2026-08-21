@@ -2,6 +2,9 @@
 
 namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Parser;
 
+use Generator;
+use XMLReader;
+
 final class ScheduleXmlParser extends AbstractSoapXmlParser
 {
     private const DEFAULT_DURATION = 1800;
@@ -23,13 +26,86 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
 
     public function parse(string $xml): array
     {
-        $reader = $this->elementReader->createReader($xml);
-        $schedule = [];
+        return $this->aggregate($this->iterate($xml));
+    }
+
+    public function iterate(string $xml): Generator
+    {
+        $errorReader = $this->elementReader->createReader($xml);
+        $metadataReader = $this->elementReader->createReader($xml);
+        $periodReader = $this->elementReader->createReader($xml);
+
+        try {
+            $this->failIfErrorMessage($this->readErrorMessage($errorReader));
+
+            yield from $this->iterateReader($metadataReader, $periodReader);
+        } finally {
+            $errorReader->close();
+            $metadataReader->close();
+            $periodReader->close();
+        }
+    }
+
+    public function parseFile(string $path): array
+    {
+        return $this->aggregate($this->iterateFile($path));
+    }
+
+    public function iterateFile(string $path): Generator
+    {
+        $errorReader = $this->elementReader->createReaderFromFile($path);
+        $metadataReader = $this->elementReader->createReaderFromFile($path);
+        $periodReader = $this->elementReader->createReaderFromFile($path);
+
+        try {
+            $this->failIfErrorMessage($this->readErrorMessage($errorReader));
+
+            yield from $this->iterateReader($metadataReader, $periodReader);
+        } finally {
+            $errorReader->close();
+            $metadataReader->close();
+            $periodReader->close();
+        }
+    }
+
+    private function iterateReader(XMLReader $metadataReader, XMLReader $periodReader): Generator
+    {
+        $recordIndex = 0;
+
+        while ($this->moveToNextSchedule($metadataReader) && $this->moveToNextSchedule($periodReader)) {
+            $metadata = $this->readScheduleMetadata($metadataReader);
+
+            if ($metadata === null) {
+                $this->skipCurrentElement($periodReader);
+                continue;
+            }
+
+            yield $recordIndex++ => $this->buildEmployeeRecord($metadata);
+
+            foreach ($this->iterateSchedulePeriods($periodReader, $metadata) as $record) {
+                yield $recordIndex++ => $record;
+            }
+        }
+    }
+
+    private function moveToNextSchedule(XMLReader $reader): bool
+    {
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === 'ГрафикДляСайта') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function readErrorMessage(XMLReader $reader): string
+    {
         $errorMessage = '';
         $parameterError = '';
 
         while ($reader->read()) {
-            if ($reader->nodeType !== \XMLReader::ELEMENT) {
+            if ($reader->nodeType !== XMLReader::ELEMENT) {
                 continue;
             }
 
@@ -40,65 +116,224 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
 
             if ($reader->localName === 'ОшибкаПараметров') {
                 $parameterError = $this->stringValue($this->elementReader->readCurrentElementValue($reader));
-                continue;
             }
-
-            if ($reader->localName !== 'ГрафикДляСайта') {
-                continue;
-            }
-
-            $item = $this->elementReader->readCurrentElementValue($reader);
-            if (!is_array($item)) {
-                continue;
-            }
-
-            $clinicUid = $this->stringValue($item['Клиника'] ?? '');
-            $employeeUid = $this->stringValue($item['СотрудникID'] ?? '');
-            if ($clinicUid === '' || $employeeUid === '') {
-                continue;
-            }
-
-            $specialtyName = $this->stringValue($item['Специализация'] ?? '');
-            if ($specialtyName === '') {
-                $specialtyName = 'Без основной специализации';
-            }
-            $specialtyUid = preg_replace('/[^a-z0-9\s]/', '', strtolower(base64_encode($specialtyName))) ?? '';
-
-            $durationFrom1C = $this->stringValue($item['ДлительностьПриема'] ?? '');
-            $durationSeconds = $durationFrom1C !== '' ? $this->parseIsoDurationToSeconds($durationFrom1C) : self::DEFAULT_DURATION;
-
-            if (!isset($schedule[$clinicUid][$specialtyUid][$employeeUid])) {
-                $schedule[$clinicUid][$specialtyUid][$employeeUid] = $this->attachExtraFields([
-                    'specialtyName' => $specialtyName,
-                    'employeeName' => $this->stringValue($item['СотрудникФИО'] ?? ''),
-                    'durationFrom1C' => $durationFrom1C,
-                    'durationInSeconds' => $durationSeconds,
-                    'timetable' => [
-                        'freeFormatted' => [],
-                        'busy' => [],
-                        'free' => [],
-                    ],
-                ], $item, self::KNOWN_KEYS);
-            }
-
-            $periods = is_array($item['ПериодыГрафика'] ?? null) ? $item['ПериодыГрафика'] : [];
-            $freeTime = $periods['СвободноеВремя']['ПериодГрафика'] ?? [];
-            $busyTime = $periods['ЗанятоеВремя']['ПериодГрафика'] ?? [];
-
-            $existing = $schedule[$clinicUid][$specialtyUid][$employeeUid]['timetable'];
-            $schedule[$clinicUid][$specialtyUid][$employeeUid]['timetable'] = [
-                'free' => array_merge($existing['free'], $this->formatTimetable($freeTime, 0, true)),
-                'busy' => array_merge($existing['busy'], $this->formatTimetable($busyTime, 0, true)),
-                'freeFormatted' => array_merge($existing['freeFormatted'], $this->formatTimetable($freeTime, $durationSeconds, false)),
-            ];
-
-            unset($item, $periods, $freeTime, $busyTime, $existing);
         }
 
-        $reader->close();
-        $this->failIfErrorMessage($errorMessage !== '' ? $errorMessage : $parameterError);
+        return $errorMessage !== '' ? $errorMessage : $parameterError;
+    }
+
+    private function readScheduleMetadata(XMLReader $reader): ?array
+    {
+        $depth = $reader->depth;
+        $source = [];
+
+        if ($reader->isEmptyElement) {
+            return null;
+        }
+
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::END_ELEMENT && $reader->depth === $depth && $reader->localName === 'ГрафикДляСайта') {
+                break;
+            }
+
+            if ($reader->nodeType !== XMLReader::ELEMENT || $reader->depth !== $depth + 1) {
+                continue;
+            }
+
+            if ($reader->localName === 'ПериодыГрафика') {
+                $this->skipCurrentElement($reader);
+                continue;
+            }
+
+            $source[$reader->localName] = $this->elementReader->readCurrentElementValue($reader);
+        }
+
+        $clinicUid = $this->stringValue($source['Клиника'] ?? '');
+        $employeeUid = $this->stringValue($source['СотрудникID'] ?? '');
+        if ($clinicUid === '' || $employeeUid === '') {
+            return null;
+        }
+
+        $specialtyName = $this->stringValue($source['Специализация'] ?? '');
+        if ($specialtyName === '') {
+            $specialtyName = 'Без основной специализации';
+        }
+
+        $durationFrom1C = $this->stringValue($source['ДлительностьПриема'] ?? '');
+
+        return [
+            'clinicUid' => $clinicUid,
+            'employeeUid' => $employeeUid,
+            'specialtyName' => $specialtyName,
+            'specialtyUid' => $this->buildSpecialtyUid($specialtyName),
+            'employeeName' => $this->stringValue($source['СотрудникФИО'] ?? ''),
+            'durationFrom1C' => $durationFrom1C,
+            'durationInSeconds' => $durationFrom1C !== '' ? $this->parseIsoDurationToSeconds($durationFrom1C) : self::DEFAULT_DURATION,
+            'source' => $source,
+        ];
+    }
+
+    private function iterateSchedulePeriods(XMLReader $reader, array $metadata): Generator
+    {
+        $depth = $reader->depth;
+
+        if ($reader->isEmptyElement) {
+            return;
+        }
+
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::END_ELEMENT && $reader->depth === $depth && $reader->localName === 'ГрафикДляСайта') {
+                break;
+            }
+
+            if ($reader->nodeType !== XMLReader::ELEMENT || $reader->depth !== $depth + 2) {
+                continue;
+            }
+
+            $timeType = match ($reader->localName) {
+                'СвободноеВремя' => 'free',
+                'ЗанятоеВремя' => 'busy',
+                default => null,
+            };
+
+            if ($timeType === null) {
+                continue;
+            }
+
+            yield from $this->readTimeTypePeriods($reader, $metadata, $timeType);
+        }
+    }
+
+    private function readTimeTypePeriods(XMLReader $reader, array $metadata, string $timeType): Generator
+    {
+        $depth = $reader->depth;
+
+        if ($reader->isEmptyElement) {
+            return;
+        }
+
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::END_ELEMENT && $reader->depth === $depth) {
+                break;
+            }
+
+            if ($reader->nodeType !== XMLReader::ELEMENT || $reader->localName !== 'ПериодГрафика') {
+                continue;
+            }
+
+            $period = $this->elementReader->readCurrentElementValue($reader);
+            if (is_array($period)) {
+                yield $this->buildPeriodRecord($metadata, $timeType, $period);
+            }
+        }
+    }
+
+    private function skipCurrentElement(XMLReader $reader): void
+    {
+        $depth = $reader->depth;
+
+        if ($reader->isEmptyElement) {
+            return;
+        }
+
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::END_ELEMENT && $reader->depth === $depth) {
+                break;
+            }
+        }
+    }
+
+    private function aggregate(iterable $records): array
+    {
+        $schedule = [];
+
+        foreach ($records as $record) {
+            $employee =& $this->ensureEmployee($schedule, $record);
+
+            if ($record['kind'] !== 'period') {
+                unset($employee);
+                continue;
+            }
+
+            $existing = $employee['timetable'];
+            if ($record['timeType'] === 'free') {
+                $employee['timetable'] = [
+                    'free' => array_merge($existing['free'], $record['period']),
+                    'busy' => $existing['busy'],
+                    'freeFormatted' => array_merge($existing['freeFormatted'], $record['formattedSlots']),
+                ];
+            }
+
+            if ($record['timeType'] === 'busy') {
+                $employee['timetable'] = [
+                    'free' => $existing['free'],
+                    'busy' => array_merge($existing['busy'], $record['period']),
+                    'freeFormatted' => $existing['freeFormatted'],
+                ];
+            }
+
+            unset($employee);
+        }
 
         return $schedule;
+    }
+
+    private function &ensureEmployee(array &$schedule, array $record): array
+    {
+        $clinicUid = $record['clinicUid'];
+        $specialtyUid = $record['specialtyUid'];
+        $employeeUid = $record['employeeUid'];
+
+        if (!isset($schedule[$clinicUid][$specialtyUid][$employeeUid])) {
+            $schedule[$clinicUid][$specialtyUid][$employeeUid] = $record['employee'];
+        }
+
+        return $schedule[$clinicUid][$specialtyUid][$employeeUid];
+    }
+
+    private function buildEmployeeRecord(array $metadata): array
+    {
+        return [
+            'kind' => 'employee',
+            'clinicUid' => $metadata['clinicUid'],
+            'specialtyUid' => $metadata['specialtyUid'],
+            'employeeUid' => $metadata['employeeUid'],
+            'employee' => $this->buildEmployee($metadata),
+        ];
+    }
+
+    private function buildPeriodRecord(array $metadata, string $timeType, array $period): array
+    {
+        return [
+            'kind' => 'period',
+            'clinicUid' => $metadata['clinicUid'],
+            'specialtyUid' => $metadata['specialtyUid'],
+            'employeeUid' => $metadata['employeeUid'],
+            'employee' => $this->buildEmployee($metadata),
+            'timeType' => $timeType,
+            'period' => $this->formatTimetable($period, 0, true),
+            'formattedSlots' => $timeType === 'free' ? $this->formatTimetable($period, $metadata['durationInSeconds'], false) : [],
+        ];
+    }
+
+    private function buildEmployee(array $metadata): array
+    {
+        return $this->attachExtraFields([
+            'specialtyName' => $metadata['specialtyName'],
+            'employeeName' => $metadata['employeeName'],
+            'durationFrom1C' => $metadata['durationFrom1C'],
+            'durationInSeconds' => $metadata['durationInSeconds'],
+            'timetable' => [
+                'freeFormatted' => [],
+                'busy' => [],
+                'free' => [],
+            ],
+        ], $metadata['source'], self::KNOWN_KEYS);
+    }
+
+    private function buildSpecialtyUid(string $specialtyName): string
+    {
+        return preg_replace('/[^a-z0-9\s]/', '', strtolower(base64_encode($specialtyName))) ?? '';
     }
 
     private function parseIsoDurationToSeconds(string $value): int

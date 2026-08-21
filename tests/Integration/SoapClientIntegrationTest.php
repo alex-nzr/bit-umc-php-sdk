@@ -11,7 +11,7 @@ use ANZ\BitUmc\SDK\Domain\Request\ReserveRequest;
 use ANZ\BitUmc\SDK\Domain\Request\ScheduleQuery;
 use ANZ\BitUmc\SDK\Domain\Request\WaitListRequest;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapRequestMapper;
-use ANZ\BitUmc\SDK\Infrastructure\Soap\SoapTransport;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\Transport\SoapTransport;
 use ANZ\BitUmc\SDK\Transport\Auth\BasicAuth;
 use ANZ\BitUmc\SDK\Transport\ConnectionOptions;
 use ANZ\BitUmc\SDK\Transport\Endpoint\EndpointResolver;

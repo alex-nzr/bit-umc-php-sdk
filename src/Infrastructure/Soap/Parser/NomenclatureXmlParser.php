@@ -26,6 +26,24 @@ final class NomenclatureXmlParser extends AbstractSoapXmlParser
     public function iterate(string $xml): \Generator
     {
         $reader = $this->elementReader->createReader($xml);
+
+        yield from $this->iterateReader($reader);
+    }
+
+    public function parseFile(string $path): array
+    {
+        return iterator_to_array($this->iterateFile($path));
+    }
+
+    public function iterateFile(string $path): \Generator
+    {
+        $reader = $this->elementReader->createReaderFromFile($path);
+
+        yield from $this->iterateReader($reader);
+    }
+
+    private function iterateReader(XMLReader $reader): \Generator
+    {
         $errorMessage = '';
         $resultValue = null;
 

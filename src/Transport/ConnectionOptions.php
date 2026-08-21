@@ -15,6 +15,7 @@ final class ConnectionOptions
         public readonly ?string $apiKey = null,
         public readonly int $timeoutSeconds = 30,
         public readonly bool $verifyPeer = false,
+        public readonly int $responseMaxBytes = 536870912,
     ) {
         $host = trim($this->host);
         $baseName = trim($this->baseName, " /\t\n\r\0\x0B");
@@ -29,6 +30,10 @@ final class ConnectionOptions
 
         if ($this->timeoutSeconds <= 0) {
             throw new InvalidArgumentException('Connection timeoutSeconds must be greater than zero.');
+        }
+
+        if ($this->responseMaxBytes <= 0) {
+            throw new InvalidArgumentException('Connection responseMaxBytes must be greater than zero.');
         }
     }
 

@@ -10,6 +10,7 @@ use ANZ\BitUmc\SDK\Infrastructure\Soap\Parser\CommonResultXmlParser;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\Parser\EmployeesXmlParser;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\Parser\NomenclatureXmlParser;
 use ANZ\BitUmc\SDK\Infrastructure\Soap\Parser\ScheduleXmlParser;
+use ANZ\BitUmc\SDK\Infrastructure\Soap\Transport\Stream\SoapPayload;
 
 final class SoapResponseParser
 {
@@ -21,7 +22,30 @@ final class SoapResponseParser
             SoapMethod::GET_CLINICS => (new ClinicsXmlParser())->iterate($payload),
             SoapMethod::GET_EMPLOYEES => (new EmployeesXmlParser())->iterate($payload),
             SoapMethod::GET_NOMENCLATURE => (new NomenclatureXmlParser())->iterate($payload),
+            SoapMethod::GET_SCHEDULE => (new ScheduleXmlParser())->iterate($payload),
             default => throw new ResponseParseException(sprintf('SOAP method %s does not return an iterable collection.', $method->value)),
+        };
+    }
+
+    public function iteratePayload(SoapMethod $method, SoapPayload $payload): \Generator
+    {
+        yield from match ($method) {
+            SoapMethod::GET_CLINICS => (new ClinicsXmlParser())->iterateFile($payload->getPath()),
+            SoapMethod::GET_EMPLOYEES => (new EmployeesXmlParser())->iterateFile($payload->getPath()),
+            SoapMethod::GET_NOMENCLATURE => (new NomenclatureXmlParser())->iterateFile($payload->getPath()),
+            SoapMethod::GET_SCHEDULE => (new ScheduleXmlParser())->iterateFile($payload->getPath()),
+            default => throw new ResponseParseException(sprintf('SOAP method %s does not return an iterable collection.', $method->value)),
+        };
+    }
+
+    public function parsePayload(SoapMethod $method, SoapPayload $payload): array
+    {
+        return match ($method) {
+            SoapMethod::GET_CLINICS => (new ClinicsXmlParser())->parseFile($payload->getPath()),
+            SoapMethod::GET_EMPLOYEES => (new EmployeesXmlParser())->parseFile($payload->getPath()),
+            SoapMethod::GET_NOMENCLATURE => (new NomenclatureXmlParser())->parseFile($payload->getPath()),
+            SoapMethod::GET_SCHEDULE => (new ScheduleXmlParser())->parseFile($payload->getPath()),
+            default => $this->parse($method, (object) ['return' => $payload->read()]),
         };
     }
 
