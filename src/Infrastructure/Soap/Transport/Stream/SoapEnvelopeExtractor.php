@@ -7,6 +7,9 @@ use Throwable;
 
 final class SoapEnvelopeExtractor
 {
+    /**
+     * @param resource $stream
+     */
     public function extract($stream, int $maxBytes): SoapPayload
     {
         $payloadPath = tempnam(sys_get_temp_dir(), 'bit-umc-soap-');
@@ -22,7 +25,7 @@ final class SoapEnvelopeExtractor
 
         $state = new SoapEnvelopeExtractionState($payloadStream, $maxBytes);
         $parser = xml_parser_create_ns('UTF-8', '|');
-        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, false);
+        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
         xml_set_element_handler($parser, [$state, 'startElement'], [$state, 'endElement']);
         xml_set_character_data_handler($parser, [$state, 'readText']);
 

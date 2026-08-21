@@ -34,9 +34,9 @@ final class CollectionIteratorsTest extends TestCase
 
         foreach ($iterator as $employee) {
             self::assertNotSame('', $employee['uid']);
-            break;
+            return;
         }
 
-        self::assertTrue(true);
+        self::fail('Employees iterator did not yield any records.');
     }
 }

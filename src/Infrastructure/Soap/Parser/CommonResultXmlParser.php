@@ -4,6 +4,9 @@ namespace ANZ\BitUmc\SDK\Infrastructure\Soap\Parser;
 
 final class CommonResultXmlParser extends AbstractSoapXmlParser
 {
+    /**
+     * @return array<string, bool|string>
+     */
     public function parse(string $xml): array
     {
         $reader = $this->elementReader->createReader($xml);

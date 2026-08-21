@@ -10,7 +10,7 @@ final class SoapRequestCaptureClient extends SoapClient
 
     public string $action = '';
 
-    public function __doRequest($request, $location, $action, $version, $oneWay = false): ?string
+    public function __doRequest($request, $location, $action, $version, $oneWay = false): string
     {
         $this->request = $request;
         $this->action = $action;

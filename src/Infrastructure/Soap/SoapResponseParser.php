@@ -14,6 +14,9 @@ use ANZ\BitUmc\SDK\Infrastructure\Soap\Transport\Stream\SoapPayload;
 
 final class SoapResponseParser
 {
+    /**
+     * @return \Generator<mixed, array<string, mixed>, mixed, void>
+     */
     public function iterate(SoapMethod $method, mixed $response): \Generator
     {
         $payload = $this->getXmlPayload($method, $response);
@@ -27,6 +30,9 @@ final class SoapResponseParser
         };
     }
 
+    /**
+     * @return \Generator<mixed, array<string, mixed>, mixed, void>
+     */
     public function iteratePayload(SoapMethod $method, SoapPayload $payload): \Generator
     {
         yield from match ($method) {
@@ -38,6 +44,9 @@ final class SoapResponseParser
         };
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function parsePayload(SoapMethod $method, SoapPayload $payload): array
     {
         return match ($method) {
@@ -49,6 +58,9 @@ final class SoapResponseParser
         };
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function parse(SoapMethod $method, mixed $response): array
     {
         if (!is_object($response) || !property_exists($response, 'return')) {

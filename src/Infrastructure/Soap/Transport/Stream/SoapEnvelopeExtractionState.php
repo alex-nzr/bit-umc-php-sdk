@@ -19,7 +19,7 @@ final class SoapEnvelopeExtractionState
     ) {
     }
 
-    public function startElement($parser, string $name): void
+    public function startElement(\XMLParser $parser, string $name): void
     {
         $this->depth++;
         if ($this->localName($name) === 'return') {
@@ -36,7 +36,7 @@ final class SoapEnvelopeExtractionState
         }
     }
 
-    public function endElement($parser, string $name): void
+    public function endElement(\XMLParser $parser, string $name): void
     {
         if ($this->returnDepth === $this->depth && $this->localName($name) === 'return') {
             $this->returnDepth = null;
@@ -49,7 +49,7 @@ final class SoapEnvelopeExtractionState
         $this->depth--;
     }
 
-    public function readText($parser, string $data): void
+    public function readText(\XMLParser $parser, string $data): void
     {
         if ($this->returnDepth === null || $this->depth < $this->returnDepth) {
             if ($this->faultDepth !== null && $this->depth >= $this->faultDepth) {

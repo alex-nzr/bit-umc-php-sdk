@@ -11,11 +11,17 @@ final class ClinicsXmlParser extends AbstractSoapXmlParser
         'Наименование',
     ];
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function parse(string $xml): array
     {
         return iterator_to_array($this->iterate($xml));
     }
 
+    /**
+     * @return \Generator<string, array<string, mixed>, mixed, void>
+     */
     public function iterate(string $xml): \Generator
     {
         $reader = $this->elementReader->createReader($xml);
@@ -23,11 +29,17 @@ final class ClinicsXmlParser extends AbstractSoapXmlParser
         yield from $this->iterateReader($reader);
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function parseFile(string $path): array
     {
         return iterator_to_array($this->iterateFile($path));
     }
 
+    /**
+     * @return \Generator<string, array<string, mixed>, mixed, void>
+     */
     public function iterateFile(string $path): \Generator
     {
         $reader = $this->elementReader->createReaderFromFile($path);
@@ -35,6 +47,9 @@ final class ClinicsXmlParser extends AbstractSoapXmlParser
         yield from $this->iterateReader($reader);
     }
 
+    /**
+     * @return \Generator<string, array<string, mixed>, mixed, void>
+     */
     private function iterateReader(XMLReader $reader): \Generator
     {
         $errorMessage = '';

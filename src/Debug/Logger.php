@@ -14,10 +14,7 @@ class Logger extends AbstractLogger
 {
     const PATH_TO_LOG_FILE = "/log/log.txt";
 
-    /**
-     * @param ...$vars
-     */
-    public static function print(...$vars): void
+    public static function print(mixed ...$vars): void
     {
         foreach ($vars as $var)
         {
@@ -27,13 +24,9 @@ class Logger extends AbstractLogger
         }
     }
 
-    /**
-     * @param ...$vars
-     * @return void
-     */
-    public static function printToFile(...$vars): void
+    public static function printToFile(mixed ...$vars): void
     {
-        $logger = new static();
+        $logger = new self();
         foreach ($vars as $var)
         {
             $logger->debug(print_r($var, true));
@@ -43,7 +36,7 @@ class Logger extends AbstractLogger
     /**
      * @param $level
      * @param \Stringable|string $message
-     * @param array $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function log($level, Stringable|string $message, array $context = []): void

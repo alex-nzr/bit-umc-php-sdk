@@ -23,7 +23,13 @@ use PHPUnit\Framework\TestCase;
 final class SoapClientIntegrationTest extends TestCase
 {
     private ?BitUmcClient $client = null;
+    /**
+     * @var array<string, array<string, mixed>>
+     */
     private array $clinics = [];
+    /**
+     * @var array<string, array<string, mixed>>
+     */
     private array $employees = [];
 
     protected function setUp(): void
@@ -56,13 +62,11 @@ final class SoapClientIntegrationTest extends TestCase
 
     public function testGetClinicsReturnsData(): void
     {
-        self::assertIsArray($this->clinics);
         self::assertNotEmpty($this->clinics);
     }
 
     public function testGetEmployeesReturnsData(): void
     {
-        self::assertIsArray($this->employees);
         self::assertNotEmpty($this->employees);
     }
 
@@ -109,15 +113,12 @@ final class SoapClientIntegrationTest extends TestCase
             specialtyName: $slot['specialtyName'],
         )));
 
-        self::assertIsArray($reserveResult);
         self::assertArrayHasKey('uid', $reserveResult);
 
         $statusResult = $this->executeWithRetry(fn (): array => $this->client?->getAppointmentStatus($reserveResult['uid']));
-        self::assertIsArray($statusResult);
         self::assertArrayHasKey('statusId', $statusResult);
 
         $deleteResult = $this->executeWithRetry(fn (): array => $this->client?->deleteAppointment($reserveResult['uid']));
-        self::assertIsArray($deleteResult);
         self::assertSame(['success' => true], $deleteResult);
     }
 
@@ -139,7 +140,6 @@ final class SoapClientIntegrationTest extends TestCase
             comment: 'Integration test wait list',
         )));
 
-        self::assertIsArray($result);
         self::assertArrayHasKey('uid', $result);
     }
 
@@ -213,10 +213,14 @@ final class SoapClientIntegrationTest extends TestCase
         $transport->execute((new SoapRequestMapper())->getClinics());
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $items
+     * @return array<string, mixed>|null
+     */
     private function findFirstByField(array $items, string $field, string $expectedValue): ?array
     {
         foreach ($items as $item) {
-            if (is_array($item) && ($item[$field] ?? null) === $expectedValue) {
+            if (($item[$field] ?? null) === $expectedValue) {
                 return $item;
             }
         }
@@ -224,10 +228,14 @@ final class SoapClientIntegrationTest extends TestCase
         return null;
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $items
+     * @return array<string, mixed>|null
+     */
     private function findFirstContains(array $items, string $field, string $needle): ?array
     {
         foreach ($items as $item) {
-            if (is_array($item) && is_string($item[$field] ?? null) && mb_stripos($item[$field], $needle) !== false) {
+            if (is_string($item[$field] ?? null) && mb_stripos($item[$field], $needle) !== false) {
                 return $item;
             }
         }
@@ -235,6 +243,9 @@ final class SoapClientIntegrationTest extends TestCase
         return null;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     private function findFirstFreeSlot(): ?array
     {
         $centralClinic = $this->findFirstByField($this->clinics, 'name', 'Центральная клиника');
@@ -243,10 +254,6 @@ final class SoapClientIntegrationTest extends TestCase
         }
 
         $schedule = $this->executeWithRetry(fn (): array => $this->client?->getSchedule(new ScheduleQuery(days: 14, clinicUid: $centralClinic['uid'])));
-        if (!is_array($schedule)) {
-            return null;
-        }
-
         foreach ($schedule as $clinicUid => $specialties) {
             foreach ($specialties as $employees) {
                 foreach ($employees as $employeeUid => $employeeData) {
@@ -269,6 +276,9 @@ final class SoapClientIntegrationTest extends TestCase
         return null;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function executeWithRetry(callable $callback, int $attempts = 2): array
     {
         $lastException = null;

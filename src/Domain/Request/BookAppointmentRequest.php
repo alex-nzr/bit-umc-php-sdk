@@ -7,6 +7,9 @@ use DateTimeInterface;
 
 final class BookAppointmentRequest
 {
+    /**
+     * @param array<int, string> $services
+     */
     public function __construct(
         public readonly string $clinicUid,
         public readonly string $employeeUid,

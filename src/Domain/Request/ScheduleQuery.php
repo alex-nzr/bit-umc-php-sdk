@@ -7,6 +7,9 @@ use DateTimeInterface;
 
 final class ScheduleQuery
 {
+    /**
+     * @param array<int, string> $employeeUids
+     */
     public function __construct(
         public readonly int $days = 14,
         public readonly string $clinicUid = '',

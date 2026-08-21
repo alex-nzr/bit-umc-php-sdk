@@ -19,7 +19,6 @@ final class NomenclatureXmlParserTest extends TestCase
 
         self::assertNotEmpty($result);
         $item = current($result);
-        self::assertIsArray($item);
         self::assertArrayHasKey('duration', $item);
         self::assertArrayHasKey('price', $item);
     }

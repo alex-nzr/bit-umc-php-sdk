@@ -45,7 +45,7 @@ final class SoapRequestMapper
             $payload->Params[] = new SoapParameter('Clinic', $query->clinicUid);
         }
 
-        $employeeUids = array_values(array_filter($query->employeeUids, static fn (mixed $value): bool => is_string($value) && $value !== ''));
+        $employeeUids = array_values(array_filter($query->employeeUids, static fn (string $value): bool => $value !== ''));
         if ($employeeUids !== []) {
             $payload->Params[] = new SoapParameter('Employees', implode(';', $employeeUids));
         }

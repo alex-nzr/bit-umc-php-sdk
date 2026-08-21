@@ -26,6 +26,9 @@ abstract class AbstractSoapXmlParser
         return is_scalar($value) ? trim((string) $value) : '';
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     protected function listify(mixed $value): array
     {
         if ($value === null || $value === '') {
@@ -35,11 +38,22 @@ abstract class AbstractSoapXmlParser
         return is_array($value) && array_is_list($value) ? $value : [$value];
     }
 
+    /**
+     * @param array<string, mixed> $source
+     * @param array<int, string> $knownKeys
+     * @return array<string, mixed>
+     */
     protected function extractExtraFields(array $source, array $knownKeys): array
     {
         return array_diff_key($source, array_flip($knownKeys));
     }
 
+    /**
+     * @param array<string, mixed> $normalized
+     * @param array<string, mixed> $source
+     * @param array<int, string> $knownKeys
+     * @return array<string, mixed>
+     */
     protected function attachExtraFields(array $normalized, array $source, array $knownKeys): array
     {
         $normalized['_extra'] = $this->extractExtraFields($source, $knownKeys);

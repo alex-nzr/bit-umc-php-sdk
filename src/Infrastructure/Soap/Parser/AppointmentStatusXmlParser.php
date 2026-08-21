@@ -6,6 +6,9 @@ use ANZ\BitUmc\SDK\Domain\Exception\RemoteServiceException;
 
 final class AppointmentStatusXmlParser extends AbstractSoapXmlParser
 {
+    /**
+     * @return array<string, string>
+     */
     public function parse(string $xml): array
     {
         $reader = $this->elementReader->createReader($xml);

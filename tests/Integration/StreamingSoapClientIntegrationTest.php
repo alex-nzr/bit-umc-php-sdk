@@ -52,7 +52,6 @@ final class StreamingSoapClientIntegrationTest extends TestCase
         $clinics = [];
 
         foreach ($client->iterateClinics() as $item) {
-            self::assertIsArray($item);
             self::assertNotSame('', $item['uid'] ?? '');
             $clinics[] = $item;
         }
@@ -61,7 +60,6 @@ final class StreamingSoapClientIntegrationTest extends TestCase
 
         $employeeFound = false;
         foreach ($client->iterateEmployees() as $item) {
-            self::assertIsArray($item);
             self::assertNotSame('', $item['uid'] ?? '');
             $employeeFound = true;
             break;
@@ -74,7 +72,6 @@ final class StreamingSoapClientIntegrationTest extends TestCase
 
         $nomenclatureFound = false;
         foreach ($client->iterateNomenclature($centralClinic['uid']) as $item) {
-            self::assertIsArray($item);
             self::assertNotSame('', $item['uid'] ?? '');
             $nomenclatureFound = true;
             break;
@@ -84,7 +81,6 @@ final class StreamingSoapClientIntegrationTest extends TestCase
 
         $scheduleFound = false;
         foreach ($client->iterateSchedule(new ScheduleQuery(days: 14, clinicUid: $centralClinic['uid'])) as $record) {
-            self::assertIsArray($record);
             self::assertContains($record['kind'] ?? null, ['employee', 'period']);
             $scheduleFound = true;
             break;
@@ -93,10 +89,14 @@ final class StreamingSoapClientIntegrationTest extends TestCase
         self::assertTrue($scheduleFound, 'Streaming schedule response is empty.');
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @return array<string, mixed>|null
+     */
     private function findFirstByField(array $items, string $field, string $expectedValue): ?array
     {
         foreach ($items as $item) {
-            if (is_array($item) && ($item[$field] ?? null) === $expectedValue) {
+            if (($item[$field] ?? null) === $expectedValue) {
                 return $item;
             }
         }

@@ -41,10 +41,14 @@ function extract_return_string(mixed $response): string
     throw new RuntimeException('Unexpected SOAP response format.');
 }
 
+/**
+ * @param array<string, array<string, mixed>> $items
+ * @return array<string, mixed>|null
+ */
 function find_by_field(array $items, string $field, string $value): ?array
 {
     foreach ($items as $item) {
-        if (is_array($item) && ($item[$field] ?? null) === $value) {
+        if (($item[$field] ?? null) === $value) {
             return $item;
         }
     }
@@ -52,10 +56,14 @@ function find_by_field(array $items, string $field, string $value): ?array
     return null;
 }
 
+/**
+ * @param array<string, array<string, mixed>> $items
+ * @return array<string, mixed>|null
+ */
 function find_contains(array $items, string $field, string $needle): ?array
 {
     foreach ($items as $item) {
-        if (is_array($item) && is_string($item[$field] ?? null) && mb_stripos($item[$field], $needle) !== false) {
+        if (is_string($item[$field] ?? null) && mb_stripos($item[$field], $needle) !== false) {
             return $item;
         }
     }
@@ -63,6 +71,10 @@ function find_contains(array $items, string $field, string $needle): ?array
     return null;
 }
 
+/**
+ * @param array<string, mixed> $schedule
+ * @return array<string, mixed>|null
+ */
 function find_first_free_slot(array $schedule): ?array
 {
     foreach ($schedule as $clinicUid => $specialties) {

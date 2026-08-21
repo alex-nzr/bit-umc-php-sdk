@@ -34,7 +34,7 @@ final class StreamingSoapTransport
         try {
             $capturedRequest = $this->captureRequest($operation);
             $stream = fopen($this->endpointResolver->resolveSoapLocation($this->options), 'rb', false, $this->createStreamContext($capturedRequest->request, $capturedRequest->action));
-            $responseHeaders = $http_response_header ?? [];
+            $responseHeaders = $http_response_header;
             if ($stream === false) {
                 throw new TransportException('Unable to open SOAP response stream.');
             }
@@ -68,6 +68,9 @@ final class StreamingSoapTransport
         return $client;
     }
 
+    /**
+     * @return resource
+     */
     private function createStreamContext(string $request, string $action)
     {
         $authorization = base64_encode($this->options->auth->getLogin() . ':' . $this->options->auth->getPassword());
@@ -93,10 +96,13 @@ final class StreamingSoapTransport
         ]);
     }
 
+    /**
+     * @param array<int, string> $headers
+     */
     private function assertSuccessfulHttpResponse(array $headers): void
     {
         $statusLine = $headers[0] ?? '';
-        if (!is_string($statusLine) || $statusLine === '') {
+        if ($statusLine === '') {
             throw new TransportException('SOAP transport did not return an HTTP status line.');
         }
 
@@ -110,6 +116,9 @@ final class StreamingSoapTransport
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getSoapOptions(): array
     {
         return [

@@ -24,11 +24,17 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         'ВидВремени',
     ];
 
+    /**
+     * @return array<string, mixed>
+     */
     public function parse(string $xml): array
     {
         return $this->aggregate($this->iterate($xml));
     }
 
+    /**
+     * @return Generator<int, array<string, mixed>, mixed, void>
+     */
     public function iterate(string $xml): Generator
     {
         $errorReader = $this->elementReader->createReader($xml);
@@ -46,11 +52,17 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function parseFile(string $path): array
     {
         return $this->aggregate($this->iterateFile($path));
     }
 
+    /**
+     * @return Generator<int, array<string, mixed>, mixed, void>
+     */
     public function iterateFile(string $path): Generator
     {
         $errorReader = $this->elementReader->createReaderFromFile($path);
@@ -68,6 +80,9 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         }
     }
 
+    /**
+     * @return Generator<int, array<string, mixed>, mixed, void>
+     */
     private function iterateReader(XMLReader $metadataReader, XMLReader $periodReader): Generator
     {
         $recordIndex = 0;
@@ -122,6 +137,9 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         return $errorMessage !== '' ? $errorMessage : $parameterError;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     private function readScheduleMetadata(XMLReader $reader): ?array
     {
         $depth = $reader->depth;
@@ -173,6 +191,10 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         ];
     }
 
+    /**
+     * @param array<string, mixed> $metadata
+     * @return Generator<int, array<string, mixed>, mixed, void>
+     */
     private function iterateSchedulePeriods(XMLReader $reader, array $metadata): Generator
     {
         $depth = $reader->depth;
@@ -204,6 +226,10 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         }
     }
 
+    /**
+     * @param array<string, mixed> $metadata
+     * @return Generator<int, array<string, mixed>, mixed, void>
+     */
     private function readTimeTypePeriods(XMLReader $reader, array $metadata, string $timeType): Generator
     {
         $depth = $reader->depth;
@@ -243,6 +269,10 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         }
     }
 
+    /**
+     * @param iterable<int, array<string, mixed>> $records
+     * @return array<string, mixed>
+     */
     private function aggregate(iterable $records): array
     {
         $schedule = [];
@@ -278,6 +308,11 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         return $schedule;
     }
 
+    /**
+     * @param array<mixed> $schedule
+     * @param array<string, mixed> $record
+     * @return array<string, mixed>
+     */
     private function &ensureEmployee(array &$schedule, array $record): array
     {
         $clinicUid = $record['clinicUid'];
@@ -291,6 +326,10 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         return $schedule[$clinicUid][$specialtyUid][$employeeUid];
     }
 
+    /**
+     * @param array<string, mixed> $metadata
+     * @return array<string, mixed>
+     */
     private function buildEmployeeRecord(array $metadata): array
     {
         return [
@@ -302,6 +341,11 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         ];
     }
 
+    /**
+     * @param array<string, mixed> $metadata
+     * @param array<string, mixed> $period
+     * @return array<string, mixed>
+     */
     private function buildPeriodRecord(array $metadata, string $timeType, array $period): array
     {
         return [
@@ -316,6 +360,10 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         ];
     }
 
+    /**
+     * @param array<string, mixed> $metadata
+     * @return array<string, mixed>
+     */
     private function buildEmployee(array $metadata): array
     {
         return $this->attachExtraFields([
@@ -343,6 +391,9 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         return $timestamp === false ? self::DEFAULT_DURATION : ((int) date('H', $timestamp) * 3600) + ((int) date('i', $timestamp) * 60);
     }
 
+    /**
+     * @return array<string, array<int, array<string, mixed>>>
+     */
     private function formatTimetable(mixed $items, int $duration, bool $useDefaultInterval): array
     {
         $items = $this->listify($items);
@@ -392,6 +443,10 @@ final class ScheduleXmlParser extends AbstractSoapXmlParser
         return $formatted;
     }
 
+    /**
+     * @param array<string, mixed> $item
+     * @return array<string, mixed>
+     */
     private function buildSlot(array $item, int $start, int $end): array
     {
         $date = $this->stringValue($item['Дата'] ?? '');

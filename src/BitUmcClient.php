@@ -40,71 +40,113 @@ final class BitUmcClient
         $this->soapResponseParser = new SoapResponseParser();
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function getClinics(): array
     {
         return $this->dispatch($this->soapRequestMapper->getClinics());
     }
 
+    /**
+     * @return \Generator<string, array<string, mixed>, mixed, void>
+     */
     public function iterateClinics(): \Generator
     {
         yield from $this->dispatchIterable($this->soapRequestMapper->getClinics());
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function getEmployees(): array
     {
         return $this->dispatch($this->soapRequestMapper->getEmployees());
     }
 
+    /**
+     * @return \Generator<string, array<string, mixed>, mixed, void>
+     */
     public function iterateEmployees(): \Generator
     {
         yield from $this->dispatchIterable($this->soapRequestMapper->getEmployees());
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function getNomenclature(string $clinicUid): array
     {
         return $this->dispatch($this->soapRequestMapper->getNomenclature($clinicUid));
     }
 
+    /**
+     * @return \Generator<string, array<string, mixed>, mixed, void>
+     */
     public function iterateNomenclature(string $clinicUid): \Generator
     {
         yield from $this->dispatchIterable($this->soapRequestMapper->getNomenclature($clinicUid));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getSchedule(?ScheduleQuery $query = null): array
     {
         return $this->dispatch($this->soapRequestMapper->getSchedule($query ?? new ScheduleQuery()));
     }
 
+    /**
+     * @return \Generator<int, array<string, mixed>, mixed, void>
+     */
     public function iterateSchedule(?ScheduleQuery $query = null): \Generator
     {
         yield from $this->dispatchIterable($this->soapRequestMapper->getSchedule($query ?? new ScheduleQuery()));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAppointmentStatus(string $appointmentUid): array
     {
         return $this->dispatch($this->soapRequestMapper->getAppointmentStatus($appointmentUid));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function sendReserve(ReserveRequest $request): array
     {
         return $this->dispatch($this->soapRequestMapper->sendReserve($request));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function sendWaitList(WaitListRequest $request): array
     {
         return $this->dispatch($this->soapRequestMapper->sendWaitList($request));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function sendAppointment(BookAppointmentRequest $request): array
     {
         return $this->dispatch($this->soapRequestMapper->sendAppointment($request));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function deleteAppointment(string $appointmentUid): array
     {
         return $this->dispatch($this->soapRequestMapper->deleteAppointment($appointmentUid));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function dispatch(SoapOperation $operation): array
     {
         if (in_array($operation->method, [SoapMethod::GET_CLINICS, SoapMethod::GET_EMPLOYEES, SoapMethod::GET_NOMENCLATURE, SoapMethod::GET_SCHEDULE], true)) {

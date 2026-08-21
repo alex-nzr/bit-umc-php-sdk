@@ -73,6 +73,9 @@ final class XmlElementReader
         return $children;
     }
 
+    /**
+     * @param array<string, mixed> $children
+     */
     private function appendChild(array &$children, string $name, mixed $value): void
     {
         if (!array_key_exists($name, $children)) {
